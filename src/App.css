@@ -32,3 +32,14 @@ form label.midnight-option{display:flex;align-items:center;gap:8px}form .midnigh
 .category-color-controls{display:grid;grid-template-columns:36px minmax(0,1fr);gap:7px}
 .category-fields input,.category-fields select{height:36px}
 @media(max-width:650px){.category-fields{grid-template-columns:repeat(2,minmax(0,1fr))}.category-fields label:first-child{grid-column:1/-1}.category-fields label:last-child{grid-column:auto}}
+
+.management-toggle{width:100%}
+.management-toggle svg:last-child{margin-left:auto}
+.management-toggle[aria-expanded="true"] svg:last-child{transform:rotate(180deg)}
+.management-links:not([hidden]){display:grid;gap:3px;margin:4px 0 0 25px}
+.management-links .nav-btn{padding:10px 12px}
+@media(max-width:650px){
+  .management-settings{width:100%}
+  .sidebar .management-toggle,.sidebar .management-links .nav-btn{justify-content:flex-start}
+  .sidebar .management-links:not([hidden]){display:flex;flex-wrap:wrap;margin-left:0}
+}
