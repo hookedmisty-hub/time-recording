@@ -49,12 +49,3 @@ form label.midnight-option{display:flex;align-items:center;gap:8px}form .midnigh
 .reward-rules ul{display:grid;gap:14px;padding-left:22px;line-height:1.6}
 .reward-rules li strong{display:block}
 
-.chart-tooltip .recharts-default-tooltip {
-  background: rgba(20, 28, 45, .91) !important;
-  border: 1px solid rgba(150, 165, 195, .32) !important;
-  border-radius: 10px;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, .24);
-  backdrop-filter: blur(6px);
-  color: #e8ecf5;
-}
-.chart-tooltip .recharts-tooltip-label { color: #e8ecf5; }
