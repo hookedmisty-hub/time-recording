@@ -66,3 +66,5 @@ form label.midnight-option{display:flex;align-items:center;gap:8px}form .midnigh
 .wizard-preview-button{font-size:13px;justify-self:start}
 
 .clear-records-link{color:#f4a6ae;font-size:13px}
+
+.archived-projects{margin-top:14px}.archived-projects>summary{cursor:pointer;color:#c4b5fd;font-weight:700;margin-bottom:10px}
