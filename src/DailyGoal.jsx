@@ -1,0 +1,13 @@
+import {useState} from 'react'
+import {effectiveGoal} from './rewards.js'
+const KEY='time-recording-goals-v1'
+const pretty=m=>`${Math.floor(m/60)}小时${m%60?`${m%60}分`:''}`
+export default function DailyGoal({date,minutes,core,auxiliary,onGoalsChange}){
+ const [saved,setSaved]=useState(()=>{try{return JSON.parse(localStorage.getItem(KEY)||'{}')[date]||null}catch{return null}})
+ const [text,setText]=useState(saved?.text||''),[hours,setHours]=useState(saved?String(effectiveGoal(saved)/60):'')
+ const [editing,setEditing]=useState(!saved),[error,setError]=useState('')
+ const save=e=>{e.preventDefault();const n=Number(hours);if(!hours||!Number.isFinite(n)||n<5||n>24||!Number.isInteger(n*60))return setError('请输入至少 5 且不超过 24 小时的目标，精确到分钟。');const next={text:text.trim(),minutes:Math.round(n*60)};try{const all=JSON.parse(localStorage.getItem(KEY)||'{}');localStorage.setItem(KEY,JSON.stringify({...all,[date]:next}));onGoalsChange({...all,[date]:next});setSaved(next);setEditing(false);setError('')}catch{setError('目标保存失败，浏览器存储不可用。')}}
+ const clear=()=>{try{const all=JSON.parse(localStorage.getItem(KEY)||'{}');delete all[date];localStorage.setItem(KEY,JSON.stringify(all));onGoalsChange(all);setSaved(null);setText('');setHours('');setEditing(true);setError('')}catch{setError('清除失败，浏览器存储不可用。')}}
+ const target=effectiveGoal(saved),remaining=Math.max(0,target-minutes)
+ return <section className="card daily-goal"><div className="card-title"><h2>{date} · 科研目标</h2>{saved&&<div className="backup-actions"><button className="secondary" onClick={clear}>清除目标</button><button className="secondary" onClick={()=>{setText(saved.text);setHours(String(effectiveGoal(saved)/60));setEditing(!editing);setError('')}}>{editing?'收起':'修改目标'}</button></div>}</div>{editing&&<form onSubmit={save} className="goal-form"><label>简短目标<input aria-label="当日科研目标" maxLength={160} placeholder="例如：写完 sec 4" value={text} onChange={e=>setText(e.target.value)}/></label><label>科研总时长目标（小时）<input aria-label="科研小时目标" required type="number" min="5" max="24" step="any" placeholder="例如：8" value={hours} onChange={e=>setHours(e.target.value)}/></label><button className="primary" type="submit">保存目标</button></form>}{error&&<p className="form-error" role="alert">{error}</p>}{<><p className="goal-title">{saved?.text||'当日科研时长目标'}</p><p>已完成 <strong>{pretty(minutes)}</strong> / {pretty(target)} · {Math.round(minutes/target*100)}%</p><progress aria-label="科研目标完成进度" max={target} value={Math.min(minutes,target)}/><p className="goal-distance">{remaining?`距离目标还差 ${pretty(remaining)}`:minutes>target?`目标已完成，超出 ${pretty(minutes-target)}`:'目标已完成'}</p></>}<p className="import-help">总科研：{pretty(minutes)} · 核心 {pretty(core)} · 辅助 {pretty(auxiliary)}。</p></section>
+}
