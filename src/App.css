@@ -57,3 +57,10 @@ form label.midnight-option{display:flex;align-items:center;gap:8px}form .midnigh
 .guide figcaption{font-size:12px;color:#b8c3d5;margin-bottom:6px}
 .guide-example{display:flex;gap:8px 18px;flex-wrap:wrap;background:#111a29;border:1px solid #34435d;border-radius:8px;padding:8px 12px;font-size:13px}
 .guide-split{display:grid;grid-template-columns:3fr 1fr;height:12px;border-radius:6px;overflow:hidden;margin-bottom:6px}
+
+.reward-wizard-form .wizard-question{font-size:16px;font-weight:700;line-height:1.45;color:#e8ecf5}
+.reward-wizard-form .wizard-toggle{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.reward-wizard-form .wizard-toggle input{width:18px;height:18px;flex:none;accent-color:#a78bfa}
+.wizard-options{display:grid;gap:10px;padding:12px;border:1px solid #34435d;border-radius:9px}
+.wizard-options small{color:#b8c3d5;line-height:1.5}
+.wizard-preview-button{font-size:13px;justify-self:start}
