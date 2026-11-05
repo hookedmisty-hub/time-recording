@@ -1,5 +1,5 @@
 import {useEffect,useRef,useState} from 'react'
-import {canChangeCurrency,money,rewardRule,scheduleRewardRule,shiftDay} from './rewards.js'
+import {canChangeCurrency,hasRewardRules,money,rewardRule,scheduleRewardRule,shiftDay} from './rewards.js'
 
 export default function RewardWizard({state,summary,today,onSave,onClose}){
  const current=state.pending?.rule||rewardRule(state,today)
@@ -20,7 +20,7 @@ export default function RewardWizard({state,summary,today,onSave,onClose}){
   if(streakStep>streakMax)return setError('连续达标的单日增幅不能超过上限。')
   if(couponMinimum>100000000)return setError('年度券门槛不能超过 1,000,000。')
   const rule={currency:fields.currency,rate,coreBonus:fields.bonus?Number(fields.coreBonus):0,streakStep,streakMax,couponMinimum,couponPercent:Number(fields.couponPercent)}
-  setPreview({rule,price,date:currencyEditable?today:shiftDay(today,1)})
+  setPreview({rule,price,date:hasRewardRules(state)?shiftDay(today,1):today})
  }
  const format=cents=>money(cents,fields.currency)
  return <dialog ref={dialog} className="modal reward-rules" aria-labelledby="wizard-title" onClose={onClose}>

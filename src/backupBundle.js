@@ -29,7 +29,7 @@ export function parseBundle(text){
  const records=parseBackup(JSON.stringify(raw.records)),goals=raw.goals||{},rewards=raw.rewards||defaultRewards()
  if(!goals||typeof goals!=='object'||Array.isArray(goals))throw new Error('每日目标格式无效。')
  for(const [date,g] of Object.entries(goals))if(!dateValid(date)||!g||typeof g.text!=='string'||g.text.length>160||!Number.isInteger(g.minutes)||g.minutes<=0||g.minutes>1440)throw new Error('备份中的每日目标无效。')
- if(rewards.startDate!==REWARD_START||!Array.isArray(rewards.wishlist)||!Array.isArray(rewards.redemptions)||!Array.isArray(rewards.restDays))throw new Error('奖励设置无效。')
+ if(!dateValid(rewards.startDate)||!Array.isArray(rewards.wishlist)||!Array.isArray(rewards.redemptions)||!Array.isArray(rewards.restDays))throw new Error('奖励设置无效。')
  validateRewardRules(rewards)
  for(const list of [rewards.wishlist,rewards.redemptions]){const seen=new Set();for(const item of list){if(!item||typeof item.id!=='string'||!item.id||seen.has(item.id)||typeof item.name!=='string'||!item.name.trim()||!Number.isSafeInteger(item.cents)||item.cents<=0||item.cents>100000000)throw new Error('心愿或兑换记录无效。');seen.add(item.id)}}
  for(const item of rewards.wishlist){if(typeof item.url!=='string')throw new Error('心愿链接无效。');if(item.url){try{if(!['https:','http:'].includes(new URL(item.url).protocol))throw new Error()}catch{throw new Error('心愿链接无效。')}}}

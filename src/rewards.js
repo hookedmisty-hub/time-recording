@@ -27,10 +27,12 @@ export function dailyResearchDetails(records,categories){
  return totals
 }
 export function dailyResearch(records,categories){return Object.fromEntries(Object.entries(dailyResearchDetails(records,categories)).map(([date,d])=>[date,d.minutes]))}
+export const hasRewardRules=state=>Boolean(state.rule||state.pending||state.settlement||state.wishlist.length||state.redemptions.length)
 export function calculateRewards(records,categories,goals,state,today){
  const details=dailyResearchDetails(records,categories),totals=Object.fromEntries(Object.entries(details).map(([date,d])=>[date,d.minutes])),rest=new Set(state.restDays),days=[]
  let streak=0,earned=state.settlement?.earned||0,todayBonus=0
  const settlement=state.settlement
+ const configured=hasRewardRules(state)
  const hasSettledRewards=(settlement?.earned||0)>0
  const firstDay=records.length||hasSettledRewards?state.startDate:today
  for(let date=firstDay;date<=today;date=shiftDay(date,1)){
@@ -40,7 +42,7 @@ export function calculateRewards(records,categories,goals,state,today){
   if(met){streak++;bonus=Math.min(rule.streakMax,(streak-1)*rule.streakStep)}else if(!restDay&&date<today)streak=0
   const coreMinutes=details[date]?.coreMinutes||0
   const settled=settlement&&date<=settlement.through
-  const cents=settled?(settlement.days[date]||0):Math.round((minutes+coreMinutes*rule.coreBonus/100)*rule.rate*(100+bonus)/6000)
+  const cents=!configured?0:settled?(settlement.days[date]||0):Math.round((minutes+coreMinutes*rule.coreBonus/100)*rule.rate*(100+bonus)/6000)
   if(!settled)earned+=cents
   if(date===settlement?.through)streak=settlement.streak
   if(date===today)todayBonus=bonus
@@ -48,7 +50,7 @@ export function calculateRewards(records,categories,goals,state,today){
  }
  const spent=state.redemptions.reduce((s,r)=>s+r.cents,0),weekday=(new Date(`${today}T12:00:00Z`).getUTCDay()+6)%7,weekStart=shiftDay(today,-weekday)
  let weekMinutes=0;for(let date=weekStart;date<=today;date=shiftDay(date,1))weekMinutes+=totals[date]||0
- return {earned,spent,balance:Math.max(0,earned-spent),overdrawn:Math.max(0,spent-earned),streak,todayBonus,weekMinutes,days,totals}
+ return {earned,spent,balance:Math.max(0,earned-spent),overdrawn:Math.max(0,spent-earned),streak,todayBonus,weekMinutes,days:configured?days:[],totals}
 }
 
 export const COUPON_MIN_CENTS=100000
@@ -76,8 +78,8 @@ function settlementThrough(state,summary,through){
  return {through,earned,days,streak:summary.days.find(d=>d.date===through)?.streak||0}
 }
 export function scheduleRewardRule(state,summary,today,rule){
+ if(!hasRewardRules(state))return {...state,startDate:today,rule}
  if(rule.currency!==rewardRule(state,today).currency&&!canChangeCurrency(state,summary))throw new Error('当前币种已锁定。')
- if(canChangeCurrency(state,summary))return {...state,rule,settlement:settlementThrough(state,summary,shiftDay(today,-1))}
  const current=settlePending(state,summary,today)
  return {...current,settlement:settlementThrough(current,summary,shiftDay(today,-1)),pending:{date:shiftDay(today,1),rule}}
 }
