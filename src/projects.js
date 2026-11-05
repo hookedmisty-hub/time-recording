@@ -1,5 +1,7 @@
 export const PROJECT_KEY='time-recording-projects-v1'
-export const DEFAULT_PROJECTS=['其他'].map(name=>({id:name,name}))
-export function includeProjects(projects,records){const result=[...projects];for(const r of records)if(r.project&&!result.some(p=>p.name===r.project))result.push({id:crypto.randomUUID(),name:r.project});return result}
+export const UNASSIGNED_PROJECT='未分类'
+export const DEFAULT_PROJECTS=['项目1',UNASSIGNED_PROJECT].map(name=>({id:name,name}))
+export const normalizeProjectRecords=records=>records.map(record=>record?.project==='其他'?{...record,project:UNASSIGNED_PROJECT}:record)
+export function includeProjects(projects,records){const result=projects.filter(p=>p.name!=='其他'&&p.name!==UNASSIGNED_PROJECT);result.push(DEFAULT_PROJECTS[1]);for(const r of records)if(r.project&&!result.some(p=>p.name===r.project))result.push({id:crypto.randomUUID(),name:r.project});return result}
 export function loadProjects(records){let projects=DEFAULT_PROJECTS;try{const saved=JSON.parse(localStorage.getItem(PROJECT_KEY));if(Array.isArray(saved)&&saved.length&&saved.every(p=>typeof p.id==='string'&&typeof p.name==='string'&&p.name.trim())&&new Set(saved.map(p=>p.name)).size===saved.length)projects=saved}catch{/* keep defaults */}return includeProjects(projects,records)}
 export function migrateProjects(records,original,draft,replacements){return records.map(r=>{let id=original.find(p=>p.name===r.project)?.id;const seen=new Set();while(replacements[id]&&!seen.has(id)){seen.add(id);id=replacements[id]}const target=draft.find(p=>p.id===id);return target?{...r,project:target.name}:r})}

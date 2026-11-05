@@ -43,3 +43,8 @@ form label.midnight-option{display:flex;align-items:center;gap:8px}form .midnigh
   .sidebar .management-toggle,.sidebar .management-links .nav-btn{justify-content:flex-start}
   .sidebar .management-links:not([hidden]){display:flex;flex-wrap:wrap;margin-left:0}
 }
+
+.reward-rules{color:inherit}
+.reward-rules::backdrop{background:#0b101bc9}
+.reward-rules ul{display:grid;gap:14px;padding-left:22px;line-height:1.6}
+.reward-rules li strong{display:block}
