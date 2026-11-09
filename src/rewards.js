@@ -8,6 +8,16 @@ export const MIN_GOAL_MINUTES=300
 export const effectiveGoal=goal=>Math.max(MIN_GOAL_MINUTES,Number.isFinite(goal?.minutes)?goal.minutes:MIN_GOAL_MINUTES)
 export const WEEKLY_MINUTES=35*60
 export const shiftDay=(day,n)=>{const d=new Date(`${day}T12:00:00Z`);d.setUTCDate(d.getUTCDate()+n);return d.toISOString().slice(0,10)}
+const mondayOf=day=>shiftDay(day,-((new Date(day+'T12:00:00Z').getUTCDay()+6)%7))
+export function updateRestDays(restDays,date,today){
+ if(!date)throw new Error('请选择日期。')
+ if(date<=today)throw new Error('休息日只能在到来前设置或修改。')
+ if(restDays.includes(date))return restDays.filter(day=>day!==date)
+ const week=mondayOf(date)
+ const otherDays=restDays.filter(day=>mondayOf(day)===week)
+ if(otherDays.some(day=>day<=today))throw new Error('本周已有生效的休息日，每周只能设置一天。')
+ return [...restDays.filter(day=>!otherDays.includes(day)),date].sort()
+}
 export const money=(cents,currency='USD')=>new Intl.NumberFormat(currency==='CNY'?'zh-CN':'en-US',{style:'currency',currency}).format(cents/100)
 export const defaultRewards=()=>({startDate:REWARD_START,wishlist:[],redemptions:[],restDays:[]})
 export function loadJSON(key,fallback){try{return JSON.parse(localStorage.getItem(key))||fallback}catch{return fallback}}
@@ -36,7 +46,7 @@ export function calculateRewards(records,categories,goals,state,today){
  const hasSettledRewards=(settlement?.earned||0)>0
  const firstDay=records.length||hasSettledRewards?state.startDate:today
  for(let date=firstDay;date<=today;date=shiftDay(date,1)){
-  const minutes=totals[date]||0,target=effectiveGoal(goals[date]),restDay=rest.has(date),met=!restDay&&target>0&&minutes>=target
+  const minutes=totals[date]||0,target=effectiveGoal(goals[date]),restDay=rest.has(date),met=minutes>=target
   const rule=rewardRule(state,date)
   let bonus=0
   if(met){streak++;bonus=Math.min(rule.streakMax,(streak-1)*rule.streakStep)}else if(!restDay&&date<today)streak=0
@@ -47,7 +57,7 @@ export function calculateRewards(records,categories,goals,state,today){
   if(date===today)todayBonus=bonus
   days.push({date,minutes,coreMinutes,target:target||0,restDay,met,bonus,cents,streak})
  }
- const spent=state.redemptions.reduce((s,r)=>s+r.cents,0),weekday=(new Date(`${today}T12:00:00Z`).getUTCDay()+6)%7,weekStart=shiftDay(today,-weekday)
+ const spent=state.redemptions.reduce((s,r)=>s+r.cents,0),weekStart=mondayOf(today)
  let weekMinutes=0;for(let date=weekStart;date<=today;date=shiftDay(date,1))weekMinutes+=totals[date]||0
  return {earned,spent,balance:Math.max(0,earned-spent),overdrawn:Math.max(0,spent-earned),streak,todayBonus,weekMinutes,days:configured?days:[],totals}
 }
