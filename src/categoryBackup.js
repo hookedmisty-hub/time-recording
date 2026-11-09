@@ -1,4 +1,3 @@
-import {isWorkRole} from './categories.js'
 export function parseCategoryBackup(text,current){
  let raw;try{raw=JSON.parse(text.replace(/^\uFEFF/,''))}catch{throw new Error('文件不是有效的 JSON。')}
  const list=raw?.categories
@@ -13,8 +12,9 @@ export function parseCategoryBackup(text,current){
   const index=merged.findIndex(x=>x.id===c.id),sameName=merged.findIndex(x=>x.name===c.name)
   if(index>=0&&sameName>=0&&index!==sameName)throw new Error('分类 ID 与名称冲突，请先调整分类名称后重试。')
   const target=index>=0?index:sameName
-  if(target>=0){const old=merged[target];if(isWorkRole(old.kind)&&c.kind!==old.kind)throw new Error('核心与辅助分类的用途固定。');if((old.name==='未分类'||old.id==='未分类'||(old.protected&&!isWorkRole(old.kind)))&&c.name!==old.name)throw new Error('不能通过导入重命名保留分类。');if(c.name==='未分类'&&old.name!=='未分类')throw new Error('未分类设置冲突。');merged[target]={...c,id:old.id,...(old.protected||old.name==='未分类'||c.name==='未分类'?{protected:true}:{})};updated++}
+  if(target>=0){const old=merged[target];if((old.name==='未分类'||old.id==='未分类')&&c.kind!=='other')throw new Error('「未分类」必须保留为普通分类。');if((old.name==='未分类'||old.id==='未分类'||(old.protected&&old.kind==='other'))&&c.name!==old.name)throw new Error('不能通过导入重命名保留分类。');if(c.name==='未分类'&&old.name!=='未分类')throw new Error('未分类设置冲突。');merged[target]={...c,id:old.id,...(old.protected||old.name==='未分类'||c.name==='未分类'?{protected:true}:{})};updated++}
   else{merged.push({...c,...(c.name==='未分类'?{protected:true}:{})});added++}
  }
+ for(const kind of ['core','research'])if(current.some(c=>c.kind===kind)&&!merged.some(c=>c.kind===kind))throw new Error('核心工作统计和工作统计各至少保留一个分类。')
  return {merged,added,updated,count:incoming.length}
 }
