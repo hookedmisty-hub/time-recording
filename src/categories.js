@@ -4,6 +4,10 @@ export const DEFAULT_CATEGORIES=[
   {id:'辅助科研',name:'辅助工作',color:'#60a5fa',kind:'research'},
   ...[['学习成长','#34d399'],['生活事务','#fb923c'],['健康运动','#2dd4bf'],['娱乐社交','#f472b6'],['休息睡眠','#94a3b8'],['未分类','#64748b']].map(([name,color])=>({id:name,name,color,kind:'other'})),
 ]
+export const isUncategorized=category=>category.id==='未分类'||category.name.trim()==='未分类'
+export function keepUncategorizedLast(categories){
+  return [...categories.filter(c=>!isUncategorized(c)),...categories.filter(isUncategorized)]
+}
 export const isWorkRole=kind=>kind==='core'||kind==='research'
 export function workCategory(categories,kind){
   return categories.find(c=>c.kind===kind)||DEFAULT_CATEGORIES.find(c=>c.kind===kind)
@@ -23,7 +27,7 @@ export function includeCategories(categories,records){
     if(existing)result[result.indexOf(existing)]={...existing,kind}
     else result.push({...fallback,id:result.some(c=>c.id===fallback.id)?crypto.randomUUID():fallback.id})
   }
-  return result
+  return keepUncategorizedLast(result)
 }
 export function splitHourly(gaps){
   return gaps.flatMap(g=>{const result=[];for(let start=g.start;start<g.end;){const end=Math.min(g.end,(Math.floor(start/60)+1)*60);result.push({start,end});start=end}return result})
