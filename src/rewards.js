@@ -44,7 +44,6 @@ export function calculateRewards(records,categories,goals,state,today){
   const settled=settlement&&date<=settlement.through
   const cents=!configured?0:settled?(settlement.days[date]||0):Math.round((minutes+coreMinutes*rule.coreBonus/100)*rule.rate*(100+bonus)/6000)
   if(!settled)earned+=cents
-  if(date===settlement?.through)streak=settlement.streak
   if(date===today)todayBonus=bonus
   days.push({date,minutes,coreMinutes,target:target||0,restDay,met,bonus,cents,streak})
  }
