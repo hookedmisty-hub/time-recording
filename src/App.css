@@ -68,3 +68,37 @@ form label.midnight-option{display:flex;align-items:center;gap:8px}form .midnigh
 .clear-records-link{color:#f4a6ae;font-size:13px}
 
 .archived-projects{margin-top:14px}.archived-projects>summary{cursor:pointer;color:#c4b5fd;font-weight:700;margin-bottom:10px}
+
+.deliverable-form{display:grid;gap:12px;margin-bottom:16px;container-type:inline-size}
+
+.deliverable-option{min-width:0;border:1px solid #34435d;border-radius:8px}
+.deliverable-option>summary{padding:10px 12px;cursor:pointer;color:#dbe4f4;font-size:13px;font-weight:600}
+.deliverable-option>summary:focus-visible{outline:2px solid #a78bfa;outline-offset:2px;border-radius:8px}
+.deliverable-option-fields{display:grid;grid-template-columns:minmax(0,1fr);gap:10px;padding:0 12px 12px}
+.deliverable-option-fields .import-help{margin:0;white-space:normal;overflow-wrap:anywhere}
+
+.deliverable-fields{display:flex;flex-wrap:wrap;align-items:flex-start;gap:10px 16px}
+.deliverable-fields>label{flex:1 1 13rem;min-width:0}
+.deliverable-time-field{display:grid;grid-template-columns:minmax(0,1fr);gap:7px;width:17rem;max-width:100%;min-width:0}
+.deliverable-fields>.deliverable-time-field{flex:0 1 15rem}
+.deliverable-time-controls{display:flex;align-items:center;gap:5px;min-width:0;width:100%}
+.deliverable-form input{height:36px}
+.deliverable-time-controls input{flex:1 1 0;width:0;min-width:0;font-size:13px;color-scheme:dark}
+.deliverable-time-action{display:grid;place-items:center;flex:0 0 28px;height:28px;padding:0;border:1px solid #34435d;border-radius:6px;background:transparent;color:#aab8cf}
+.deliverable-time-action.mark{color:#c4b5fd}
+.deliverable-time-action:hover{background:#25334b;color:#f0f3fa}
+.deliverable-time-action:focus-visible{outline:2px solid #a78bfa;outline-offset:2px}
+
+.deliverable-progress{display:grid;align-items:start;gap:12px}
+@container (min-width: 33rem){
+  .deliverable-progress{grid-template-columns:minmax(0,1.35fr) minmax(16.25rem,1fr)}
+}
+
+.deliverable-list{gap:8px;margin-bottom:0}
+.deliverable-item{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 12px}
+.deliverable-item-copy{display:grid;min-width:0;gap:3px;overflow-wrap:anywhere}
+.deliverable-item-copy strong{line-height:1.3}
+.deliverable-item-meta{margin:0;color:#b8c3d5;font-size:12px;line-height:1.4}
+.deliverable-edit{display:grid;place-items:center;flex:0 0 28px;height:28px;border-radius:6px;color:#aab8cf}
+.deliverable-edit:hover:not(:disabled){background:#25334b}
+.deliverable-edit:disabled{opacity:.45;cursor:default}

@@ -17,8 +17,9 @@ export function parseBackup(text) {
     if (r.categoryKind != null && !['core','research','other'].includes(r.categoryKind)) fail('分类用途无效。')
     if (r.project != null && typeof r.project !== 'string') fail('研究项目必须是文本。')
     if (r.coreMinutes != null && (!Number.isInteger(r.coreMinutes)||r.coreMinutes<0||r.coreMinutes>recordMinutes(r))) fail('核心分钟数必须是 0 到活动总分钟数之间的整数。')
+    if (r.deliverableId != null && (typeof r.deliverableId !== 'string' || !r.deliverableId.trim())) fail('交付项 ID 无效。')
     if (r.note != null && typeof r.note !== 'string') fail('备注必须是文本。')
-    return {id:r.id,title:r.title,date:r.date,start:r.start,end:r.end,category:r.category,project:r.project ?? '',note:r.note ?? '',...(r.coreMinutes!=null?{coreMinutes:r.coreMinutes}:{}),...(r.categoryColor?{categoryColor:r.categoryColor}:{}),...(r.categoryKind?{categoryKind:r.categoryKind}:{})}
+    return {id:r.id,title:r.title,date:r.date,start:r.start,end:r.end,category:r.category,project:r.project ?? '',note:r.note ?? '',...(r.deliverableId?{deliverableId:r.deliverableId}:{}),...(r.coreMinutes!=null?{coreMinutes:r.coreMinutes}:{}),...(r.categoryColor?{categoryColor:r.categoryColor}:{}),...(r.categoryKind?{categoryKind:r.categoryKind}:{})}
   })
 }
 const interval = r => {
@@ -26,7 +27,7 @@ const interval = r => {
   const base = Date.parse(`${r.date}T00:00:00`)/60000
   return [base+mins(r.start),base+mins(r.end)+(r.end<r.start?1440:0)]
 }
-const sameRecord = (a,b) => ['title','date','start','end','category','project','note','coreMinutes'].every(key=>(a[key]??'')===(b[key]??''))
+const sameRecord = (a,b) => ['title','date','start','end','category','project','note','coreMinutes','deliverableId'].every(key=>(a[key]??'')===(b[key]??''))
 export function planImport(existing, incoming, choices={}) {
   const current = new Map(existing.map(r=>[r.id,r])), seen = new Set(), additions=[], conflicts=[], updates=[]
   let duplicates=0, fileDuplicates=0

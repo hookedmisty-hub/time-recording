@@ -1,5 +1,6 @@
 import {validateTodos} from './todos.js'
 import {parseBackup} from './backup.js'
+import {validateDeliverables} from './deliverables.js'
 import {defaultRewards,REWARD_START,COUPON_MIN_CENTS,couponCost,DEFAULT_REWARD_RULE} from './rewards.js'
 const dateValid=d=>typeof d==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(d)&&Number.isFinite(Date.parse(`${d}T00:00:00Z`))&&new Date(`${d}T00:00:00Z`).toISOString().slice(0,10)===d
 const integerIn=(n,min,max)=>Number.isSafeInteger(n)&&n>=min&&n<=max
@@ -24,8 +25,8 @@ function validateRewardRules(rewards){
 }
 export function parseBundle(text){
  let raw;try{raw=JSON.parse(text.replace(/^\uFEFF/,''))}catch{throw new Error('文件不是有效的 JSON。')}
- if(Array.isArray(raw))return {records:parseBackup(text),settings:null}
- if(!raw||raw.version!=='1.3'||!Array.isArray(raw.records))throw new Error('请选择本应用导出的记录数组或 v1.3 完整备份。')
+ if(Array.isArray(raw))return {records:parseBackup(text).map(({deliverableId:_deliverableId,...record})=>record),settings:null,deliverables:[]}
+ if(!raw||!['1.3','1.4'].includes(raw.version)||!Array.isArray(raw.records))throw new Error('请选择本应用导出的记录数组或完整 JSON 备份。')
  const records=parseBackup(JSON.stringify(raw.records)),goals=raw.goals||{},rewards=raw.rewards||defaultRewards()
  if(!goals||typeof goals!=='object'||Array.isArray(goals))throw new Error('每日目标格式无效。')
  for(const [date,g] of Object.entries(goals))if(!dateValid(date)||!g||typeof g.text!=='string'||g.text.length>160||!Number.isInteger(g.minutes)||g.minutes<=0||g.minutes>1440)throw new Error('备份中的每日目标无效。')
@@ -39,5 +40,11 @@ export function parseBundle(text){
  const categories=raw.categories,projects=raw.projects
  for(const [list,type] of [[categories,'category'],[projects,'project']])if(list!==undefined){if(!Array.isArray(list)||!list.length||list.some(x=>!x||typeof x.id!=='string'||!x.id||typeof x.name!=='string'||!x.name.trim()||(type==='project'&&x.archived!==undefined&&typeof x.archived!=='boolean')||x.name.length>(type==='category'?40:60))||new Set(list.map(x=>x.id)).size!==list.length||new Set(list.map(x=>x.name)).size!==list.length)throw new Error('分类或项目设置无效。')}
  if(categories&&categories.some(c=>!/^#[0-9a-f]{6}$/i.test(c.color)||!['core','research','other'].includes(c.kind)))throw new Error('分类颜色或用途无效。')
- return {records,settings:{goals,rewards,...(raw.todos!==undefined?{todos:validateTodos(raw.todos)}:{}),...(categories?{categories}:{}),...(projects?{projects}:{})}}
+ const deliverables=validateDeliverables(raw.deliverables===undefined?[]:raw.deliverables,projects||[])
+ const projectNames=new Map((projects||[]).map(p=>[p.id,p.name]))
+ const itemProjects=new Map(deliverables.map(item=>[item.id,projectNames.get(item.projectId)]))
+ for(const record of records){
+  if(record.deliverableId&&itemProjects.get(record.deliverableId)!==record.project)throw new Error('备份中有记录关联到不存在或不属于该项目的交付项。')
+ }
+ return {records,deliverables,settings:{goals,rewards,...(raw.todos!==undefined?{todos:validateTodos(raw.todos)}:{}),...(categories?{categories}:{}),...(projects?{projects}:{})}}
 }
