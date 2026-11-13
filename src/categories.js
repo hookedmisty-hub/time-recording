@@ -1,7 +1,7 @@
 export const CATEGORY_KEY='time-recording-categories-v1'
 export const DEFAULT_CATEGORIES=[
   {id:'核心科研',name:'核心工作',color:'#a78bfa',kind:'core'},
-  {id:'辅助科研',name:'辅助科研',color:'#60a5fa',kind:'research'},
+  {id:'辅助科研',name:'辅助工作',color:'#60a5fa',kind:'research'},
   ...[['学习成长','#34d399'],['生活事务','#fb923c'],['健康运动','#2dd4bf'],['娱乐社交','#f472b6'],['休息睡眠','#94a3b8'],['未分类','#64748b']].map(([name,color])=>({id:name,name,color,kind:'other'})),
 ]
 export const isUncategorized=category=>category.id==='未分类'
