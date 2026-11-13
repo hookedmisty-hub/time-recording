@@ -4,6 +4,7 @@ import { Plus, Clock3, BriefcaseBusiness, CalendarDays, ChartNoAxesCombined, Tra
 import './App.css'
 import CategoryManager from './CategoryManager.jsx'
 import ProjectManager from './ProjectManager.jsx'
+import CloudAccount from './CloudAccount.jsx'
 import DeliverableEditor from './DeliverableEditor.jsx'
 import ProjectStats from './ProjectStats.jsx'
 import DailyGoal from './DailyGoal.jsx'
@@ -112,6 +113,7 @@ function App(){
   }
   const deliveryProjects=projects.filter(p=>p.id!==UNASSIGNED_PROJECT&&(!deliveryProjectId||p.id===deliveryProjectId)&&
     (!p.archived||p.id===deliveryProjectId||deliverables.some(item=>item.projectId===p.id)))
+  const [showAccount,setShowAccount]=useState(false)
   const [showGuide,setShowGuide]=useState(false)
   const [showRewardRules,setShowRewardRules]=useState(false)
   const [managementOpen,setManagementOpen]=useState(false)
@@ -256,9 +258,11 @@ function App(){
       <button className="nav-btn" onClick={()=>setShowCategories(true)}>分类管理</button>
       <button className="nav-btn" onClick={()=>setShowProjects(true)}>项目管理</button>
       <button className="nav-btn" onClick={exportJSON}>一键导出</button>
+      <button className="nav-btn" onClick={()=>setShowAccount(true)}>账号与云同步</button>
     </div>
   </div></nav><div className="sidebar-bottom">所有数据保存在当前浏览器<br/>建议定期导出备份</div></aside>
-  <main className="main"><header><div><div className="eyebrow">PERSONAL TIME JOURNAL · V3.1</div><h1>{tab==='today'?'今日记录':tab==='stats'?'统计分析':tab==='rewards'?'心愿奖励':tab==='deliverables'?'交付任务':'历史记录'}</h1><p className="subtitle">把每一天，变成可以回顾的生活。</p>{tab==='today'&&currentStreak>0&&<p className="streak-banner" role="status">已连续达标{currentStreak}天！</p>}</div><div className="backup-actions">{tab==='rewards'&&<button className="secondary" onClick={()=>setShowRewardRules(true)}>查看规则</button>}<button className="primary" onClick={()=>openNew()}><Plus size={18}/> 添加记录</button></div></header>
+  <main className="main"><header><div><div className="eyebrow">PERSONAL TIME JOURNAL · V3.2</div><h1>{tab==='today'?'今日记录':tab==='stats'?'统计分析':tab==='rewards'?'心愿奖励':tab==='deliverables'?'交付任务':'历史记录'}</h1><p className="subtitle">把每一天，变成可以回顾的生活。</p>{tab==='today'&&currentStreak>0&&<p className="streak-banner" role="status">已连续达标{currentStreak}天！</p>}</div><div className="backup-actions">{tab==='rewards'&&<button className="secondary" onClick={()=>setShowRewardRules(true)}>查看规则</button>}<button className="primary" onClick={()=>openNew()}><Plus size={18}/> 添加记录</button></div></header>
+  {showAccount&&<CloudAccount snapshot={{records,categories,projects,deliverables,goals,todos,rewards}} onClose={()=>setShowAccount(false)}/>}
   {showGuide&&<div className="overlay" onClick={e=>{if(e.target===e.currentTarget)setShowGuide(false)}}><section className="modal category-modal guide" role="dialog" aria-modal="true" aria-labelledby="guide-title" onKeyDown={e=>{if(e.key==='Escape')setShowGuide(false)}}>
     <div className="modal-header"><h2 id="guide-title">使用指南</h2><button autoFocus className="close" aria-label="关闭使用指南" onClick={()=>setShowGuide(false)}>✕</button></div>
     <p>这个时间账本受柳比歇夫时间记录法启发。记下每项活动实际花了多久，再回顾时间用在了哪里，帮助你调整接下来的安排。</p>
