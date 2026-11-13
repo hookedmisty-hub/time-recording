@@ -25,7 +25,7 @@ export function validateJournal(value) {
 
 // Catalogs and rewards are merged as units: renaming/deleting a catalog also changes
 // record references, and a reward settlement must never be merged field by field.
-function entities(s) {
+export function journalEntities(s) {
   const out = new Map()
   for (const field of ['records','deliverables']) for (const item of s[field]) out.set(`${field}/${item.id}`,item)
   for (const field of ['goals','todos']) for (const [id,item] of Object.entries(s[field])) out.set(`${field}/${id}`,item)
@@ -34,7 +34,7 @@ function entities(s) {
 }
 
 export function mergeJournal(base,local,remote,choices={}) {
-  const b=base?entities(base):new Map(), l=entities(local), r=entities(remote)
+  const b=base?journalEntities(base):new Map(), l=journalEntities(local), r=journalEntities(remote)
   const result=new Map(),conflicts=[]
   for(const id of new Set([...b.keys(),...l.keys(),...r.keys()])) {
     const bv=b.get(id),lv=l.get(id),rv=r.get(id)

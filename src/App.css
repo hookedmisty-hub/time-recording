@@ -244,3 +244,7 @@ form label.midnight-option{display:flex;align-items:center;gap:8px}form .midnigh
 @media(max-width:360px){
  .history-list-title .backup-actions{flex-direction:column;align-items:stretch}
 }
+
+.guide-backup-options{list-style:disc;padding-left:20px;margin:12px 0 0}
+.guide-backup-options>li{margin:0 0 12px;padding-left:2px}
+.guide-backup-options>li:last-child{margin-bottom:0}

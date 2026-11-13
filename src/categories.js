@@ -1,16 +1,18 @@
 export const CATEGORY_KEY='time-recording-categories-v1'
 export const DEFAULT_CATEGORIES=[
   {id:'核心科研',name:'核心工作',color:'#a78bfa',kind:'core'},
-  {id:'辅助科研',name:'辅助工作',color:'#60a5fa',kind:'research'},
+  {id:'辅助科研',name:'辅助科研',color:'#60a5fa',kind:'research'},
   ...[['学习成长','#34d399'],['生活事务','#fb923c'],['健康运动','#2dd4bf'],['娱乐社交','#f472b6'],['休息睡眠','#94a3b8'],['未分类','#64748b']].map(([name,color])=>({id:name,name,color,kind:'other'})),
 ]
-export const isUncategorized=category=>category.id==='未分类'||category.name.trim()==='未分类'
+export const isUncategorized=category=>category.id==='未分类'
+export const isDefaultCategory=category=>['核心科研','辅助科研','未分类'].includes(category.id)
 export function keepUncategorizedLast(categories){
   return [...categories.filter(c=>!isUncategorized(c)),...categories.filter(isUncategorized)]
 }
 export const isWorkRole=kind=>kind==='core'||kind==='research'
 export function workCategory(categories,kind){
-  return categories.find(c=>c.kind===kind)||DEFAULT_CATEGORIES.find(c=>c.kind===kind)
+  const fallback=DEFAULT_CATEGORIES.find(c=>c.kind===kind)
+  return categories.find(c=>c.id===fallback?.id&&c.kind===kind)||categories.find(c=>c.kind===kind)||fallback
 }
 export function loadCategories(records){
   let categories=DEFAULT_CATEGORIES

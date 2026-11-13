@@ -1,3 +1,4 @@
+import {canonical} from './cloudMigration.js'
 // Web Crypto primitives only; no key or passphrase is transmitted to the server.
 const ITERATIONS=600000,FORMAT='journal-e2ee-v1'
 const enc=new TextEncoder(),dec=new TextDecoder()
@@ -61,3 +62,25 @@ export async function changeEncryptionPassphrase(unlocked,passphrase){
  return {...unlocked,header:{...unlocked.header,password:{salt:b64(salt),iterations:ITERATIONS,...await seal(key,unlocked.raw,aad(unlocked.userId,unlocked.keyId,'password'))}}}
 }
 export function forgetEncryption(unlocked){if(unlocked?.raw)unlocked.raw.fill(0)}
+
+// Opaque per-entity identifiers; neither record IDs nor dates are exposed to storage.
+export async function syncItemToken(path,unlocked){
+ const key=await crypto.subtle.importKey('raw',unlocked.raw,{name:'HMAC',hash:'SHA-256'},false,['sign'])
+ return b64(new Uint8Array(await crypto.subtle.sign('HMAC',key,enc.encode(`journal-delta-v1|${unlocked.userId}|${unlocked.keyId}|${path}`))))
+}
+export async function encryptSyncItem(path,value,revision,unlocked){
+ const token=await syncItemToken(path,unlocked)
+ const body=value===undefined?{path,deleted:true}:{path,value,deleted:false}
+ return {token,payload:await seal(unlocked.key,enc.encode(JSON.stringify(body)),aad(unlocked.userId,unlocked.keyId,`delta|${token}|${revision}`))}
+}
+export async function decryptSyncItem(item,unlocked){
+ if(!Number.isSafeInteger(item.revision)||item.revision<1||! /^[A-Za-z0-9_-]{43}$/.test(item.token))throw new Error('增量记录格式无效。')
+ try{
+  const body=JSON.parse(dec.decode(await open(unlocked.key,item.payload,aad(unlocked.userId,unlocked.keyId,`delta|${item.token}|${item.revision}`))))
+  if(typeof body.path!=='string'||typeof body.deleted!=='boolean'||(!body.deleted&&!Object.hasOwn(body,'value'))||await syncItemToken(body.path,unlocked)!==item.token)throw new Error()
+  return body
+ }catch{throw new Error('增量数据验证失败，未修改本地内容。')}
+}
+export async function syncDigest(entries){
+ return b64(new Uint8Array(await crypto.subtle.digest('SHA-256',enc.encode(canonical([...entries].sort(([a],[b])=>a<b?-1:a>b?1:0))))))
+}

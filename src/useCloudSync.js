@@ -125,7 +125,7 @@ export function useCloudSync(snapshot,onApply){
   // Store a recovery copy before the first replace/merge. Failure to save stops sync.
   if(!automatic)localStorage.setItem(`time-recording-before-sync-${p.id}`,JSON.stringify(p.local))
   let revision=p.remote.revision,updatedAt=p.remote.updatedAt
-  if(!same(p.journal,p.remote.journal)||!p.remote.encrypted){const result=await writeJournal(client,p.journal,p.remote.revision,unlocked.current,p.remote.legacyToken);revision=result.revision;updatedAt=result.updatedAt;guard(p.id,p.token);cipherCache.current={userId:p.id,revision,envelope:result.envelope}}
+  if(!same(p.journal,p.remote.journal)||!p.remote.encrypted){const result=await writeJournal(client,p.journal,p.remote.revision,unlocked.current,p.remote.legacyToken,p.remote);revision=result.revision;updatedAt=result.updatedAt;guard(p.id,p.token);cipherCache.current={userId:p.id,revision,envelope:result.envelope}}
   guard(p.id,p.token)
   const rebased=mergeJournal(p.local,current.current,p.journal)
   if(!rebased.journal)throw new Error('上传期间本地又有修改，已保留本地内容，请重新预览合并。')
@@ -208,7 +208,7 @@ export function useCloudSync(snapshot,onApply){
    guard(id,token)
    const latest={...unlocked.current,header:{format:remote.envelope.format,keyId:remote.envelope.keyId,password:remote.envelope.password,recovery:remote.envelope.recovery}}
    const changed=await changeEncryptionPassphrase(latest,passphrase)
-   guard(id,token);const saved=await writeJournal(client,remote.journal,remote.revision,changed);guard(id,token);cipherCache.current={userId:id,revision:saved.revision,envelope:saved.envelope}
+   guard(id,token);const saved=await writeJournal(client,remote.journal,remote.revision,changed,null,remote);guard(id,token);cipherCache.current={userId:id,revision:saved.revision,envelope:saved.envelope}
    unlocked.current=changed;setStatus('加密口令已更新，恢复密钥仍然有效；已解锁的设备不会被撤销')
   }catch(err){setError(err.message)}finally{running.current=false;setBusy(false)}
  }

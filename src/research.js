@@ -5,7 +5,7 @@ export function researchAllocation(record,type,offset=0,length=recordMinutes(rec
  if(!['core','research'].includes(type))return {core:0,research:0}
  const total=recordMinutes(record)
  if(!(total>0))return {core:0,research:0}
- const core=Number.isInteger(record.coreMinutes)?Math.min(total,Math.max(0,record.coreMinutes)):(type==='core'?total:0)
+ const core=type==='research'?0:Number.isInteger(record.coreMinutes)?Math.min(total,Math.max(0,record.coreMinutes)):total
  const allocated=Math.round((offset+length)*core/total)-Math.round(offset*core/total)
  return {core:allocated,research:length-allocated}
 }
