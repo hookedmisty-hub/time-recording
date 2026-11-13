@@ -232,3 +232,15 @@ form label.midnight-option{display:flex;align-items:center;gap:8px}form .midnigh
 @media(max-width:650px){header{flex-wrap:wrap;align-items:flex-start}header>.backup-actions{margin-left:auto}}
 .app header>.backup-actions{justify-content:flex-end}
 @media(max-width:650px){.app header>.backup-actions{margin-left:auto;column-gap:8px;row-gap:8px}}
+
+/* Keep history backup controls separate from the heading on small screens. */
+.history-list-title>h2{min-width:0}
+.history-list-title .backup-actions{flex-shrink:0}
+@media(max-width:650px){
+ .history-list-title{flex-direction:column;align-items:stretch;gap:14px}
+ .history-list-title .backup-actions{display:flex;justify-content:flex-end;gap:8px}
+ .history-list-title .backup-actions>button{white-space:nowrap;min-width:0;padding:9px 10px;font-size:13px}
+}
+@media(max-width:360px){
+ .history-list-title .backup-actions{flex-direction:column;align-items:stretch}
+}
