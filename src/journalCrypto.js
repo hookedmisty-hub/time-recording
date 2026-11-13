@@ -84,3 +84,12 @@ export async function decryptSyncItem(item,unlocked){
 export async function syncDigest(entries){
  return b64(new Uint8Array(await crypto.subtle.digest('SHA-256',enc.encode(canonical([...entries].sort(([a],[b])=>a<b?-1:a>b?1:0))))))
 }
+
+// Rehydrate an already wrapped device key and verify it against the current head.
+export async function restoreDeviceEncryption(envelope,userId,keyId,raw){
+ checkEnvelope(envelope)
+ if(envelope.keyId!==keyId||raw.length!==32)throw new Error('此设备保存的解锁信息已失效。')
+ const unlocked={userId,keyId,raw,key:await aes(raw),header:{format:FORMAT,keyId,password:envelope.password,recovery:envelope.recovery}}
+ await decryptJournal(envelope,unlocked)
+ return unlocked
+}

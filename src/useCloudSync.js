@@ -1,3 +1,4 @@
+import {rememberDeviceUnlock,restoreRememberedUnlock,forgetDeviceUnlock,clearDeviceUnlocks} from './deviceUnlock.js'
 import {useEffect,useRef,useState} from 'react'
 import {cloudClient,accountClient} from './cloudClient.js'
 import {readJournal,writeJournal} from './syncTransport.js'
@@ -17,6 +18,7 @@ export function useCloudSync(snapshot,onApply){
  const [status,setStatus]=useState('尚未启用双向同步'),[error,setError]=useState(''),[preview,setPreview]=useState(null)
  const unlocked=useRef(null),cipherCache=useRef(null)
  const [security,setSecurity]=useState({ready:false,locked:null,recoveryCode:'',saved:false})
+ const [remembered,setRemembered]=useState(false)
  const external=useRef(false)
  const loggingOut=useRef(false),schedule=useRef(null)
  const [externalChange,setExternalChange]=useState(false)
@@ -32,9 +34,10 @@ export function useCloudSync(snapshot,onApply){
  const sessionRef=useRef(session),metaRef=useRef(meta),securityRef=useRef(security)
  sessionRef.current=session;metaRef.current=meta;securityRef.current=security
  const persist=next=>{localStorage.setItem(META,JSON.stringify(next));metaRef.current=next;setMeta(next)}
- const clearAndReload=(clearLocal=true)=>{
+ const clearAndReload=async(clearLocal=true)=>{
   epoch.current++;pending.current=true;schedule.current?.stop()
   forgetEncryption(unlocked.current);unlocked.current=null;cipherCache.current=null;sessionRef.current=null
+  await clearDeviceUnlocks().catch(()=>{})
   finishLocalLogout(window.localStorage,window.sessionStorage,clearLocal)
   window.location.reload()
  }
@@ -46,7 +49,7 @@ export function useCloudSync(snapshot,onApply){
   cloudClient.auth.getSession().then(({data,error})=>{if(active){if(error)setError(error.message);setSession(data.session)}})
   const {data}=cloudClient.auth.onAuthStateChange((_event,next)=>{
    if(_event==='SIGNED_OUT'&&(sessionRef.current?.user.id||metaRef.current?.userId)&&!loggingOut.current){clearRef.current(shouldClearOnLogout(window.localStorage));return}
-   if(sessionRef.current?.user.id!==next?.user.id){cipherCache.current=null;epoch.current++;pending.current=false;forgetEncryption(unlocked.current);unlocked.current=null;setSecurity({ready:false,locked:null,recoveryCode:'',saved:false});setPreview(null);setStatus('账号已变化，请确认同步设置')}
+   if(sessionRef.current?.user.id!==next?.user.id){setRemembered(false);cipherCache.current=null;epoch.current++;pending.current=false;forgetEncryption(unlocked.current);unlocked.current=null;setSecurity({ready:false,locked:null,recoveryCode:'',saved:false});setPreview(null);setStatus('账号已变化，请确认同步设置')}
    sessionRef.current=next;setSession(next)
   })
   return()=>{active=false;invalidate();data.subscription.unsubscribe()}
@@ -86,8 +89,19 @@ export function useCloudSync(snapshot,onApply){
    const m=metaRef.current
    if(automatic&&(!m?.enabled||m.userId!==id))return
    if(mode!=='restore'&&m&&m.userId!==id)throw new Error('当前本地账本曾关联另一账号。请先导出备份，再选择从当前账号的云端恢复；不会自动上传其他账号的数据。')
-   const local=validateJournal(current.current),remote=await readForAccount(id,client,unlocked.current,m?.userId===id?m:null)
+   const local=validateJournal(current.current);let remote=await readForAccount(id,client,unlocked.current,m?.userId===id?m:null)
    guard(id,token)
+   let restored=false
+   if(remote.locked){
+    let saved=null
+    try{saved=await restoreRememberedUnlock(id,remote.envelope)}catch{/* Manual unlock remains available when device storage is unavailable. */}
+    guard(id,token)
+    if(saved){
+     unlocked.current=saved;restored=true;setRemembered(true)
+     setSecurity({ready:true,locked:null,recoveryCode:'',saved:true})
+     remote=await readForAccount(id,client,saved,m?.userId===id?m:null);guard(id,token)
+    }
+   }
    if(remote.locked){pending.current=true;setSecurity({ready:false,locked:remote.envelope,recoveryCode:'',saved:false});setPreview(null);setStatus('云端账本已加密，等待解锁');return}
    // Adopt current wrapping slots so a previously unlocked device cannot undo a
    // passphrase change made on another device when it next saves the journal.
@@ -104,7 +118,7 @@ export function useCloudSync(snapshot,onApply){
     if(!automatic){setPreview(null);setStatus('本地与云端一致');setError('')}
     return
    }
-   if(automatic&&merge.journal&&!merge.conflicts.length&&!merge.error){await commit(p,client,true)}
+   if((automatic||(restored&&m?.enabled&&m.userId===id))&&merge.journal&&!merge.conflicts.length&&!merge.error){await commit(p,client,true)}
    else {pending.current=true;setPreview(p);setStatus(merge.conflicts.length?'同步暂停：存在冲突':merge.error?'同步暂停：关联需要处理':'请确认同步预览')}
   }catch(err){setError(err.message);setStatus('同步暂停，本地修改仍保留')}
   finally{running.current=false;if(!automatic)setBusy(false)}
@@ -164,13 +178,35 @@ export function useCloudSync(snapshot,onApply){
   forgetEncryption(unlocked.current);unlocked.current=null
   setSecurity({ready:false,locked:null,recoveryCode:'',saved:false});setStatus(clearLocal?'正在退出并清空本地数据':'正在退出，保留本地数据')
   try{
+   await clearDeviceUnlocks()
+   setRemembered(false)
    saveLogoutChoice(window.localStorage,clearLocal)
    const {error}=await cloudClient.auth.signOut({scope:'local'})
    if(error)throw error
-   clearAndReload(clearLocal)
+   await clearAndReload(clearLocal)
   }catch(err){loggingOut.current=false;setError(`退出或本地清理未完成：${err.message}。请重试。`);setStatus('同步已停止，等待退出');setBusy(false)}
  }
- const lock=()=>{pause();forgetEncryption(unlocked.current);unlocked.current=null;setSecurity({ready:false,locked:null,recoveryCode:'',saved:false});setStatus('云同步已锁定，本地数据仍可使用')}
+ const setRememberDevice=async(value)=>{
+  if(running.current)return false
+  running.current=true;setBusy(true)
+  try{
+   const key=unlocked.current,id=sessionRef.current?.user.id,token=epoch.current
+   if(!id)throw new Error('请先登录。')
+   if(value){
+    if(!key||key.userId!==id||!securityRef.current.ready||(securityRef.current.recoveryCode&&!securityRef.current.saved))throw new Error('请先解锁并保存恢复密钥。')
+    await rememberDeviceUnlock(key)
+   }else await forgetDeviceUnlock(id)
+   try{guard(id,token)}catch(err){if(value)await forgetDeviceUnlock(id);throw err}
+   setRemembered(value);setError('');return true
+  }catch(err){setError(err.message);return false}
+  finally{running.current=false;setBusy(false)}
+ }
+ const confirmRecoverySaved=async(saved)=>{
+  const next={...securityRef.current,saved}
+  securityRef.current=next;setSecurity(next)
+  await setRememberDevice(saved)
+ }
+ const lock=async()=>{if(!await setRememberDevice(false))return;pause();forgetEncryption(unlocked.current);unlocked.current=null;setSecurity({ready:false,locked:null,recoveryCode:'',saved:false});setStatus('云同步已锁定，本地数据仍可使用')}
  const setup=async(passphrase)=>{
   if(running.current)return
   running.current=true;setBusy(true);setError('')
@@ -186,14 +222,17 @@ export function useCloudSync(snapshot,onApply){
    setSecurity({ready:true,locked:null,recoveryCode:result.recoveryCode,saved:false});setStatus('请保存恢复密钥，再预览同步')
   }catch(err){setError(err.message)}finally{running.current=false;setBusy(false)}
  }
- const unlock=async(secret,recovery)=>{
+ const unlock=async(secret,recovery,remember=true)=>{
   if(running.current)return
   running.current=true;setBusy(true);setError('')
   try{
    const {id,client}=await credentials(),token=epoch.current,remote=await readForAccount(id,client)
    if(!remote.locked)throw new Error('云端加密状态已变化，请重新预览。')
    const next=await unlockEncryption(remote.envelope,id,secret,recovery)
-   guard(id,token);unlocked.current=next;pending.current=false
+   guard(id,token)
+   if(remember)await rememberDeviceUnlock(next);else await forgetDeviceUnlock(id).catch(()=>{})
+   try{guard(id,token)}catch(err){if(remember)await forgetDeviceUnlock(id);throw err}
+   setRemembered(remember);unlocked.current=next;pending.current=false
    setSecurity({ready:true,locked:null,recoveryCode:'',saved:true});setStatus('已解锁，请预览合并或从云端恢复')
   }catch(err){setError(err.message)}finally{running.current=false;setBusy(false)}
  }
@@ -236,6 +275,7 @@ export function useCloudSync(snapshot,onApply){
  },[session?.user.id,meta?.enabled,meta?.userId])
  return {session,busy,status,error,setError,preview,setPreview,makePlan,confirm,choose,setMode,pause,logout,meta,security,setSecurity,setup,unlock,lock,changePassphrase,externalChange,localUpdatedAt,
   hasUnsyncedChanges:session&&(!meta?.base||!same(snapshot,meta.base)),
+  remembered,setRememberDevice,confirmRecoverySaved,
   enabled:meta?.enabled&&meta?.userId===session?.user.id,
   cancel:pause}
 }
