@@ -87,7 +87,7 @@ function App(){
   const saveTodos=items=>{const next={...todos,[date]:items};localStorage.setItem(TODO_KEY,JSON.stringify(next));setTodos(next)}
   const [goals,setGoals]=useState(()=>loadJSON(GOAL_KEY,{}))
   const [rewards,setRewards]=useState(()=>loadJSON(REWARD_KEY,defaultRewards()))
-  const today=localDate()
+  const [today,setToday]=useState(localDate)
   useEffect(()=>{
     if(!rewards.pending||rewards.pending.date>today)return
     const latest=loadJSON(REWARD_KEY,null)
@@ -116,6 +116,26 @@ function App(){
   const [showRewardRules,setShowRewardRules]=useState(false)
   const [managementOpen,setManagementOpen]=useState(false)
   const [date,setDate]=useState(localDate())
+  useEffect(()=>{
+    let previousDay=localDate()
+    const refreshDay=()=>{
+      const nextDay=localDate()
+      if(nextDay===previousDay)return
+      const oldDay=previousDay
+      previousDay=nextDay
+      setToday(nextDay)
+      setDate(selected=>selected===oldDay?nextDay:selected)
+    }
+    const timer=window.setInterval(refreshDay,30000)
+    window.addEventListener('focus',refreshDay)
+    document.addEventListener('visibilitychange',refreshDay)
+    return ()=>{
+      window.clearInterval(timer)
+      window.removeEventListener('focus',refreshDay)
+      document.removeEventListener('visibilitychange',refreshDay)
+    }
+  },[])
+
   const [showForm,setShowForm]=useState(false)
   const [form,setForm]=useState(initialForm())
   const [editing,setEditing]=useState(null)
@@ -174,11 +194,11 @@ function App(){
   }
   useEffect(()=>localStorage.setItem(KEY,JSON.stringify(records)),[records])
   useEffect(()=>localStorage.setItem(CATEGORY_KEY,JSON.stringify(categories)),[categories])
-  const showExamples=records.length===0&&date===localDate()
+  const showExamples=records.length===0&&date===today
   const examples=[
-    {id:'example-work',title:'整理材料和撰写报告',date,start:'09:00',end:'10:00',category:workCategory(categories,'core').name,coreMinutes:45,project:'项目1'},
-    {id:'example-study',title:'阅读与整理笔记',date,start:'10:15',end:'10:45',category:'学习成长'},
-    {id:'example-walk',title:'午间散步',date,start:'12:30',end:'13:00',category:'健康运动'},
+    {id:'example-work',title:'整理材料和撰写报告',date:today,start:'09:00',end:'10:00',category:workCategory(categories,'core').name,coreMinutes:45,project:'项目1'},
+    {id:'example-study',title:'阅读与整理笔记',date:today,start:'10:15',end:'10:45',category:'学习成长'},
+    {id:'example-walk',title:'午间散步',date:today,start:'12:30',end:'13:00',category:'健康运动'},
   ]
   const chartRecords=showExamples?examples:records
   const chartCategories=showExamples?includeCategories(categories,examples):categories
@@ -238,7 +258,7 @@ function App(){
       <button className="nav-btn" onClick={exportJSON}>一键导出</button>
     </div>
   </div></nav><div className="sidebar-bottom">所有数据保存在当前浏览器<br/>建议定期导出备份</div></aside>
-  <main className="main"><header><div><div className="eyebrow">PERSONAL TIME JOURNAL · V3.0</div><h1>{tab==='today'?'今日记录':tab==='stats'?'统计分析':tab==='rewards'?'心愿奖励':tab==='deliverables'?'交付任务':'历史记录'}</h1><p className="subtitle">把每一天，变成可以回顾的生活。</p>{tab==='today'&&currentStreak>0&&<p className="streak-banner" role="status">已连续达标{currentStreak}天！</p>}</div><div className="backup-actions">{tab==='rewards'&&<button className="secondary" onClick={()=>setShowRewardRules(true)}>查看规则</button>}<button className="primary" onClick={()=>openNew()}><Plus size={18}/> 添加记录</button></div></header>
+  <main className="main"><header><div><div className="eyebrow">PERSONAL TIME JOURNAL · V3.1</div><h1>{tab==='today'?'今日记录':tab==='stats'?'统计分析':tab==='rewards'?'心愿奖励':tab==='deliverables'?'交付任务':'历史记录'}</h1><p className="subtitle">把每一天，变成可以回顾的生活。</p>{tab==='today'&&currentStreak>0&&<p className="streak-banner" role="status">已连续达标{currentStreak}天！</p>}</div><div className="backup-actions">{tab==='rewards'&&<button className="secondary" onClick={()=>setShowRewardRules(true)}>查看规则</button>}<button className="primary" onClick={()=>openNew()}><Plus size={18}/> 添加记录</button></div></header>
   {showGuide&&<div className="overlay" onClick={e=>{if(e.target===e.currentTarget)setShowGuide(false)}}><section className="modal category-modal guide" role="dialog" aria-modal="true" aria-labelledby="guide-title" onKeyDown={e=>{if(e.key==='Escape')setShowGuide(false)}}>
     <div className="modal-header"><h2 id="guide-title">使用指南</h2><button autoFocus className="close" aria-label="关闭使用指南" onClick={()=>setShowGuide(false)}>✕</button></div>
     <p>这个时间账本受柳比歇夫时间记录法启发。记下每项活动实际花了多久，再回顾时间用在了哪里，帮助你调整接下来的安排。</p>

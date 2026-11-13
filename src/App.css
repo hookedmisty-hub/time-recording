@@ -102,3 +102,12 @@ form label.midnight-option{display:flex;align-items:center;gap:8px}form .midnigh
 .deliverable-edit{display:grid;place-items:center;flex:0 0 28px;height:28px;border-radius:6px;color:#aab8cf}
 .deliverable-edit:hover:not(:disabled){background:#25334b}
 .deliverable-edit:disabled{opacity:.45;cursor:default}
+
+.calendar-days>button{position:relative}
+.calendar-days>button:hover,.calendar-days>button:focus-visible{z-index:2}
+.calendar-work-tooltip{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);display:none;pointer-events:none;width:max-content;padding:9px 12px;border:1px solid #77659f80;border-radius:9px;background:rgba(26,23,43,.4);backdrop-filter:blur(1px);-webkit-backdrop-filter:blur(1px);box-shadow:0 3px 10px #0002;color:#ede9fe;text-align:left;font-size:12px;line-height:1.5;font-weight:400}
+.calendar-work-tooltip>span{display:block;color:#b6adc9;font-size:11px}
+.calendar-work-tooltip>strong{display:block;font-weight:600}
+.calendar-work-tooltip.tooltip-left{left:0;transform:none}
+.calendar-work-tooltip.tooltip-right{left:auto;right:0;transform:none}
+.calendar-days>button:hover .calendar-work-tooltip,.calendar-days>button:focus-visible .calendar-work-tooltip{display:block}
