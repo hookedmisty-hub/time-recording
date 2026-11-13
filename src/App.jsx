@@ -279,7 +279,13 @@ function App(){
       <li><h3>记下第一条活动</h3><p>点「添加记录」，填写活动名称、起止时间，再选择分类。</p><figure><figcaption>记录示例</figcaption><div className="guide-example"><strong>整理材料和撰写报告</strong><span>09:00 – 10:00 · 重点工作</span></div></figure></li>
       <li><h3>拆分重点工作</h3><p>如果这一小时里有 45 分钟用来分析和写作，就填 45 分钟「{coreCategory.name}」。余下的 15 分钟自动计入「{auxCategory.name}」。两项都可以在「分类管理」中改名。</p><figure><figcaption>60 分钟如何分配</figcaption><div className="guide-split" aria-hidden="true"><span style={{background:coreCategory.color}}/><span style={{background:auxCategory.color}}/></div><div className="guide-example"><span>{coreCategory.name} · 45 分钟</span><span>{auxCategory.name} · 15 分钟</span></div></figure></li>
       <li><h3>回顾时间分配</h3><p>「历史记录」按日期查看活动，「统计分析」比较各项目的用时。</p><div className="guide-example" aria-label="回顾入口"><span>历史记录 → 按日期回顾</span><span>统计分析 → 项目用时</span></div></li>
-      <li><h3>备份与恢复</h3><p>记录保存在当前浏览器。换设备或浏览器时，用「管理设置 → 一键导出」下载 JSON，再到「历史记录 → 导入 JSON」恢复。</p></li>
+      <li><h3>备份与恢复</h3>
+        <p><strong>导出完整备份：</strong>在「管理设置 → 一键导出」或「历史记录 → 导出全部 JSON」下载备份，包含时间记录、分类、项目（含归档状态与排序）、交付任务及关联、每日目标、待办，以及奖励规则、心愿、兑换记录和休息日。</p>
+        <p><strong>导入与合并：</strong>在「历史记录 → 导入 JSON」选择文件，校验并预览后确认恢复。记录按 ID 合并，相同内容跳过；同 ID 内容不同时，可逐条选择保留版本，默认保留当前记录。本次导入不会删除现有记录；旧版备份也可导入。</p>
+        <p><strong>恢复设置：</strong>默认合并记录与交付任务，保留同 ID 的当前交付任务。若要恢复奖励规则、心愿等设置，请勾选「同时恢复目标、奖励与待办设置」；这会覆盖当前对应设置，备份中的分类、项目、待办及同 ID 交付任务也以备份为准。操作前建议先导出当前完整备份。</p>
+        <p><strong>多设备云同步：</strong>在「管理设置 → 账号与云同步」登录同一账号。首次启用时设置独立的加密口令并保存恢复密钥；换设备使用原口令解锁，无需重新生成密钥。首次同步可将已有本地账本上传，或从云端恢复。同步启用并解锁后，本地修改会延迟同步，空闲时每 5 分钟检查更新，也可手动点击「检查更新」。两端有差异时，可选择本地覆盖云端、云端覆盖本地或合并；合并冲突需确认保留版本。</p>
+        <p><strong>保管与退出：</strong>云端账本加密保存，浏览器本地数据与普通 JSON 备份仍为明文，请妥善保管。加密口令与登录密码独立；忘记口令且丢失恢复密钥后，管理员无法恢复云端内容。退出登录时可选择是否清空本地；清除浏览器的网站数据也会删除本地账本，建议定期导出备份。</p>
+      </li>
     </ol>
     <p>熟悉记录后，可以在首页设置每日工作目标和待办，也可以在「心愿奖励」查看奖励规则。</p>
     <div className="actions"><button className="primary" onClick={()=>{setShowGuide(false);openNew()}}>添加第一条记录</button></div>
