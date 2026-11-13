@@ -171,3 +171,37 @@ form label.midnight-option{display:flex;align-items:center;gap:8px}form .midnigh
 .encryption-advanced>summary{font-size:13px;font-weight:500;color:#aab7cc;cursor:pointer;line-height:1.5}
 .encryption-advanced>.backup-actions{display:flex;flex-wrap:wrap;gap:8px}
 .encryption-advanced>.backup-actions>.secondary{justify-content:center;min-height:40px;padding:9px 8px;font-size:13px;font-weight:600;white-space:nowrap}
+
+/* Keep native date/time controls within their grid cells, including iOS Safari. */
+.modal form,.modal form label{min-width:0}
+.modal .form-row{grid-template-columns:repeat(2,minmax(0,1fr))}
+.modal form input[type=date],.modal form input[type=time],.modal form input[type=datetime-local]{display:block;width:100%;min-width:0;max-width:100%;min-inline-size:0;box-sizing:border-box}
+.modal form input::-webkit-datetime-edit{min-width:0;padding:0}
+.modal form input::-webkit-date-and-time-value{min-height:1.25em;text-align:left}
+@media(max-width:650px){
+ .overlay{padding:calc(12px + env(safe-area-inset-top,0px)) 12px calc(12px + env(safe-area-inset-bottom,0px))}
+ .modal{width:100%;max-width:500px;min-width:0;padding:20px 18px;max-height:calc(100vh - 24px);max-height:calc(100dvh - 24px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+ .modal form input:not([type=checkbox]):not([type=radio]):not([type=color]),.modal form select,.modal form textarea{font-size:16px;min-height:44px;max-width:100%;min-width:0;padding:10px}
+ .modal .form-row{gap:10px}
+ .modal form label{font-size:13px}
+ .modal .actions{flex-wrap:wrap}
+ .modal .actions>button{min-height:44px}
+ .modal-header{gap:12px;margin-bottom:20px}
+ .modal-header .close{flex-shrink:0;min-width:32px;min-height:32px}
+}
+@media(max-width:360px){.modal .form-row{grid-template-columns:minmax(0,1fr)}}
+
+/* Apply the same native-control constraints to page-level date filters. */
+.app input:is([type=date],[type=time],[type=datetime-local],[type=month]){min-width:0;max-width:100%;box-sizing:border-box}
+.project-filters label,.rest-controls label,.calendar-heading label{max-width:100%;min-width:0}
+.project-filters input[type=date],.rest-controls input[type=date],.calendar-heading input[type=month]{width:100%;min-inline-size:0}
+.calendar-heading label{flex:1 1 0;max-width:180px}
+@media(max-width:650px){
+ .project-filters label{flex:1 1 140px;min-width:0}
+ .rest-controls label{flex:1 1 150px;min-width:0}
+ .project-filters input[type=date],.rest-controls input[type=date],.calendar-heading input[type=month]{font-size:16px;min-height:44px}
+ .deliverable-time-field{width:100%}
+ .deliverable-fields>.deliverable-time-field{flex:1 1 100%}
+ .deliverable-time-controls{flex-wrap:wrap}
+ .deliverable-time-controls input[type=datetime-local]{flex:1 1 100%;width:100%;font-size:16px;min-height:44px}
+}
