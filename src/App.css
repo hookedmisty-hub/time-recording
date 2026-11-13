@@ -205,3 +205,30 @@ form label.midnight-option{display:flex;align-items:center;gap:8px}form .midnigh
  .deliverable-time-controls{flex-wrap:wrap}
  .deliverable-time-controls input[type=datetime-local]{flex:1 1 100%;width:100%;font-size:16px;min-height:44px}
 }
+
+/* Isolate native temporal controls from iOS intrinsic padding/width rules. */
+.temporal-control{display:flex;align-items:center;box-sizing:border-box;width:100%;min-width:0;max-width:100%;min-height:42px;padding:8px 12px;border:1px solid #34435d;border-radius:9px;background:#111a29;color:#f0f3fa;color-scheme:dark;font:inherit}
+.temporal-control:focus-within{border-color:#a78bfa;box-shadow:0 0 0 1px #a78bfa30}
+.temporal-control.is-disabled{opacity:.65}
+.app .temporal-control>input{display:block!important;appearance:none!important;-webkit-appearance:none!important;box-sizing:border-box!important;flex:1 1 0!important;width:100%!important;min-width:0!important;max-width:100%!important;min-inline-size:0!important;height:24px!important;min-height:24px!important;padding:0!important;margin:0!important;border:0!important;border-radius:0;background:transparent!important;box-shadow:none!important;outline:none;color:inherit;font-size:inherit!important;line-height:24px;color-scheme:dark}
+.app .temporal-control>input::-webkit-date-and-time-value{display:block;min-width:0;min-height:24px;text-align:left;line-height:24px;white-space:nowrap}
+.app .temporal-control>input::-webkit-datetime-edit{min-width:0;padding:0}
+.calendar-heading .temporal-control{max-width:180px;min-height:36px;padding:5px 7px;border-radius:7px}
+.deliverable-time-controls>.temporal-control{flex:1 1 0;width:0;min-height:36px;padding:5px 8px}
+@media(max-width:650px){
+ .temporal-control{min-height:44px;font-size:16px;padding:9px 10px}
+ .calendar-heading .temporal-control{font-size:16px;min-height:44px}
+ .deliverable-time-controls>.temporal-control{flex:1 1 100%;width:100%;min-height:44px;font-size:16px}
+ .modal .record-time-row{grid-template-columns:repeat(auto-fit,minmax(min(100%,9rem),1fr))}
+}
+
+/* Shared typography for text actions; icon-only and navigation controls keep their own sizing. */
+:root{--action-button-font-size:13px;--action-button-font-weight:600;--action-button-line-height:1.4}
+.app button:not(.close):not(.icon-btn):not(.nav-btn):not(.encryption-help-toggle):not(.deliverable-edit):not(.deliverable-time-action):not(.calendar-heading>button){font-size:var(--action-button-font-size);font-weight:var(--action-button-font-weight);line-height:var(--action-button-line-height)}
+:root{--action-button-height:40px;--action-button-padding-x:14px}
+.app :is(.primary,.secondary){min-height:var(--action-button-height);padding:9px var(--action-button-padding-x);justify-content:center}
+.app .account-actions>.secondary{padding-inline:8px;min-width:0}
+.app .unlock-row>.primary{height:44px;min-height:44px;padding:0 16px}
+@media(max-width:650px){header{flex-wrap:wrap;align-items:flex-start}header>.backup-actions{margin-left:auto}}
+.app header>.backup-actions{justify-content:flex-end}
+@media(max-width:650px){.app header>.backup-actions{margin-left:auto;column-gap:8px;row-gap:8px}}

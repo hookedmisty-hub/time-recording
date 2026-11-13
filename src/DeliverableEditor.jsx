@@ -1,3 +1,4 @@
+import TemporalInput from './TemporalInput.jsx'
 import {Check,Pencil,X} from 'lucide-react'
 import {useState} from 'react'
 
@@ -48,7 +49,7 @@ export default function DeliverableEditor({project,items,records,onChange}){
  const timeField=(label,key,markLabel,clearLabel)=><div className="deliverable-time-field">
   <label htmlFor={draft.id+'-'+key}>{label}</label>
   <div className="deliverable-time-controls">
-   <input id={draft.id+'-'+key} name={key} type="datetime-local" defaultValue={localInput(draft[key])}/>
+   <TemporalInput id={draft.id+'-'+key} name={key} type="datetime-local" defaultValue={localInput(draft[key])}/>
    {markLabel&&<button type="button" className="deliverable-time-action mark" aria-label={markLabel} title={markLabel+'（记为现在）'} onClick={e=>setTime(e,key,new Date().toISOString())}>
     <Check size={16} aria-hidden="true"/>
    </button>}
