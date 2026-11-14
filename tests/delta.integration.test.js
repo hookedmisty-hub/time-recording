@@ -36,7 +36,7 @@ test('PostgreSQL encrypted delta transport and migration', {skip:!PGlite},async 
  }
  const a=client(uid),b=client(uid),outsider=client(other),anon=client('', 'anon')
  const {unlocked,recoveryCode}=await createEncryption(uid,pass)
- const initial=empty();initial.records=Array.from({length:240},(_,i)=>record(String(i).padStart(4,'0')))
+ const initial=empty();initial.preferences={subtitle:'自己的记录提醒'};initial.records=Array.from({length:240},(_,i)=>record(String(i).padStart(4,'0')))
  initial.deliverables=[{id:'d',projectId:'项目1',name:'Private delivery',milestoneName:'Draft',dueAt:'2026-12-01T10:00:00+08:00',milestoneAt:null,completedAt:null}]
  initial.records[0].deliverableId='d'
  initial.goals['2026-11-12']={text:'Private goal',minutes:300}
@@ -48,7 +48,7 @@ test('PostgreSQL encrypted delta transport and migration', {skip:!PGlite},async 
  assert.equal(old.envelope.syncFormat,undefined)
  const migration=await writeJournal(a,initial,old.revision,unlocked,null,old)
  assert.equal(migration.delta,true)
- assert.equal(a.calls.at(-1).args.p_changes.length,246)
+ assert.equal(a.calls.at(-1).args.p_changes.length,247)
  assert.equal(JSON.stringify(a.calls.at(-1).args).includes('Private activity'),false)
  const locked=await readJournal(b)
  assert.equal(locked.locked,true)
