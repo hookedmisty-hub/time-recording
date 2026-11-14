@@ -259,3 +259,43 @@ form label.midnight-option{display:flex;align-items:center;gap:8px}form .midnigh
 .header-account{margin:0;color:#b9acd9;font-size:13px;line-height:1.5;text-align:right;overflow-wrap:anywhere;max-width:100%}
 .header-controls>.backup-actions{justify-content:flex-end}
 @media(max-width:650px){.header-controls{gap:10px}.header-account{font-size:12px}}
+
+.sidebar-account{margin-top:auto;padding:28px 15px 8px;color:#b9acd9;font-size:12px;line-height:1.6;overflow-wrap:anywhere}
+.sidebar-account span{display:block;color:#9aa6bd;margin-top:3px}
+.sidebar-account+.sidebar-bottom{margin-top:0}
+@media(max-width:650px){.sidebar-account{padding:14px 3px 0;font-size:12px}}
+
+.brand>div{min-width:0}
+.brand .sidebar-account{margin:9px 0 0;padding:0;font-size:11px}
+.brand .sidebar-account span{margin-top:1px}
+
+/* Keep the clock aligned to the title, independent of the text below it. */
+.brand{display:grid;grid-template-columns:35px minmax(0,1fr);column-gap:13px;row-gap:0;align-items:center}
+.brand>div{display:contents}
+.brand-icon{grid-column:1;grid-row:1;line-height:1;align-self:center}
+.brand strong{grid-column:2;grid-row:1;display:flex;align-items:center;min-height:35px}
+.brand small{grid-column:2;grid-row:2;margin-top:0}
+.brand .sidebar-account{grid-column:2;grid-row:3;margin:2px 0 0;padding:0}
+
+.brand .account-indicator{position:relative;width:max-content;max-width:100%;color:#9aa6bd;font-weight:400}
+.account-indicator summary{list-style:none;cursor:pointer;outline-offset:4px}
+.account-indicator summary::-webkit-details-marker{display:none}
+
+.brand .account-status-link{display:inline;padding:0;min-height:0;border:0;border-radius:0;background:transparent;color:inherit;font:inherit;cursor:pointer}
+.brand .account-status-link:hover{color:#c4b5fd}
+.account-status-link:focus-visible{outline:2px solid #a78bfa;outline-offset:3px}
+
+.brand small .account-indicator{display:inline-block;vertical-align:baseline;margin:0 0 0 5px;padding:0;font-size:inherit;white-space:nowrap}
+
+.editable-subtitle{display:flex;align-items:center;gap:5px;max-width:100%}
+.editable-subtitle .subtitle{overflow-wrap:anywhere;min-width:0}
+.subtitle-edit-button{opacity:0;flex-shrink:0;transition:opacity .15s}
+.editable-subtitle:hover .subtitle-edit-button,.editable-subtitle:focus-within .subtitle-edit-button{opacity:1}
+.subtitle-editor{max-width:520px;gap:5px;margin-top:8px}
+.subtitle-edit-row{display:flex;align-items:center;gap:5px;min-width:0}
+.subtitle-edit-row input{min-width:0;flex:1;font-size:14px;padding:8px 10px}
+.subtitle-edit-row button{flex-shrink:0}
+@media(hover:none){.subtitle-edit-button{opacity:1}}
+
+.brand small{font-size:13px;line-height:1.5}
+.brand small .guide-link{font-size:inherit;line-height:inherit}

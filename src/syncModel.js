@@ -30,6 +30,7 @@ export function journalEntities(s) {
   for (const field of ['records','deliverables']) for (const item of s[field]) out.set(`${field}/${item.id}`,item)
   for (const field of ['goals','todos']) for (const [id,item] of Object.entries(s[field])) out.set(`${field}/${id}`,item)
   for (const field of ['categories','projects','rewards']) out.set(field,s[field])
+  if(s.preferences!==undefined)out.set('preferences',s.preferences)
   return out
 }
 

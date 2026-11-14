@@ -9,7 +9,7 @@ import {finishLocalLogout,saveLogoutChoice,shouldClearOnLogout,LOGOUT_EVENT,crea
 const META='time-recording-sync-v2'
 const LOCAL_TIME='time-recording-local-updated-at-v1'
 const loadLocalTime=()=>{try{const value=localStorage.getItem(LOCAL_TIME);return Number.isFinite(Date.parse(value))?value:null}catch{return null}}
-const DATA_KEYS=new Set(['time-recording-v1','time-recording-categories-v1','time-recording-projects-v1','time-recording-deliverables-v1','time-recording-goals-v1','time-recording-todos-v1','time-recording-rewards-v1',META])
+const DATA_KEYS=new Set(['time-recording-preferences-v1','time-recording-v1','time-recording-categories-v1','time-recording-projects-v1','time-recording-deliverables-v1','time-recording-goals-v1','time-recording-todos-v1','time-recording-rewards-v1',META])
 const load=()=>{try{return JSON.parse(localStorage.getItem(META)||'null')}catch{return null}}
 export function useCloudSync(snapshot,onApply){
  const current=useRef(snapshot),apply=useRef(onApply),running=useRef(false),epoch=useRef(0),pending=useRef(false)

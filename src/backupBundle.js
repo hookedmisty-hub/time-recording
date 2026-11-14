@@ -1,3 +1,4 @@
+import {validatePreferences} from './preferences.js'
 import {validateTodos} from './todos.js'
 import {parseBackup} from './backup.js'
 import {validateDeliverables} from './deliverables.js'
@@ -46,5 +47,5 @@ export function parseBundle(text){
  for(const record of records){
   if(record.deliverableId&&itemProjects.get(record.deliverableId)!==record.project)throw new Error('备份中有记录关联到不存在或不属于该项目的交付项。')
  }
- return {records,deliverables,settings:{goals,rewards,...(raw.todos!==undefined?{todos:validateTodos(raw.todos)}:{}),...(categories?{categories}:{}),...(projects?{projects}:{})}}
+ return {records,deliverables,settings:{goals,rewards,...(raw.preferences!==undefined?{preferences:validatePreferences(raw.preferences)}:{}),...(raw.todos!==undefined?{todos:validateTodos(raw.todos)}:{}),...(categories?{categories}:{}),...(projects?{projects}:{})}}
 }

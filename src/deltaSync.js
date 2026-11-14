@@ -15,7 +15,7 @@ export async function supportsDelta(client){
 function journalFromEntities(map){
  const journal={records:[],deliverables:[],goals:{},todos:{}}
  for(const [path,value] of map){
-  if(['categories','projects','rewards'].includes(path)){journal[path]=value;continue}
+  if(['categories','projects','rewards','preferences'].includes(path)){journal[path]=value;continue}
   const slash=path.indexOf('/'),field=path.slice(0,slash),id=path.slice(slash+1)
   if(slash<0||!id||!['records','deliverables','goals','todos'].includes(field)||['__proto__','constructor','prototype'].includes(id))throw new Error('未知增量记录类型。')
   if(Array.isArray(journal[field])){if(value?.id!==id)throw new Error('增量记录关联无效。');journal[field].push(value)}

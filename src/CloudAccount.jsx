@@ -12,7 +12,7 @@ export default function CloudAccount({onClose,sync}){
  const formatTime=value=>value?new Date(value).toLocaleString(undefined,{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'}):'未知（尚未记录）'
  const newer=preview?.localUpdatedAt&&preview?.remote.updatedAt?Math.sign(Date.parse(preview.localUpdatedAt)-Date.parse(preview.remote.updatedAt)):0
  const modeLabel={upload:'本地覆盖云端',restore:'云端覆盖本地',merge:'合并'}
- const conflictLabel=id=>({categories:'分类设置',projects:'项目设置',rewards:'奖励设置'}[id]||id.replace('records/','记录：').replace('deliverables/','交付任务：').replace('goals/','每日目标：').replace('todos/','待办：'))
+ const conflictLabel=id=>({categories:'分类设置',projects:'项目设置',rewards:'奖励设置',preferences:'个性化设置'}[id]||id.replace('records/','记录：').replace('deliverables/','交付任务：').replace('goals/','每日目标：').replace('todos/','待办：'))
  const [confirmError,setConfirmError]=useState('')
  const blockedReason=busy?'正在读取或同步，请稍候。':
   !preview?.journal?'请先完成恢复预览或处理全部合并冲突。':
