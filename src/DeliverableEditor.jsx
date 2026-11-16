@@ -1,6 +1,6 @@
 import TemporalInput from './TemporalInput.jsx'
 import {Check,Pencil,X} from 'lucide-react'
-import {useState} from 'react'
+import {useEffect,useState} from 'react'
 
 function localInput(value){
  if(!value)return ''
@@ -19,6 +19,8 @@ function fromLocal(value){
 }
 
 export default function DeliverableEditor({project,items,records,onChange}){
+ const [now,setNow]=useState(()=>Date.now())
+ useEffect(()=>{const timer=setInterval(()=>setNow(Date.now()),1000);return ()=>clearInterval(timer)},[])
  const [draft,setDraft]=useState(null)
  const [error,setError]=useState('')
  const pending=items.filter(item=>!item.completedAt)
@@ -61,7 +63,7 @@ export default function DeliverableEditor({project,items,records,onChange}){
  const itemRow=item=><div className="category-row deliverable-item" key={item.id}>
   <div className="deliverable-item-copy">
    <strong>{item.name}</strong>
-   <p className="deliverable-item-meta">{item.dueAt?`截止 ${localInput(item.dueAt).replace('T',' ')} · `:''}{item.milestoneAt?`${item.milestoneName} ${localInput(item.milestoneAt).replace('T',' ')} · `:''}{item.completedAt?`完成 ${localInput(item.completedAt).replace('T',' ')}`:'进行中'} · {records.filter(r=>r.deliverableId===item.id).length} 条记录</p>
+   <p className="deliverable-item-meta">{item.dueAt&&<><span className={!item.completedAt&&Date.parse(item.dueAt)<now?'deliverable-overdue':undefined}>截止 {localInput(item.dueAt).replace('T',' ')}</span> · </>}{item.milestoneAt?`${item.milestoneName} ${localInput(item.milestoneAt).replace('T',' ')} · `:''}{item.completedAt?`完成 ${localInput(item.completedAt).replace('T',' ')}`:'进行中'} · {records.filter(r=>r.deliverableId===item.id).length} 条记录</p>
   </div>
   <button type="button" className="icon-btn deliverable-edit" aria-label={`编辑 ${item.name}`} title="编辑交付项" disabled={Boolean(draft)} onClick={()=>open(item)}>
    <Pencil size={16} aria-hidden="true"/>

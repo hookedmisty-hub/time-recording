@@ -396,3 +396,5 @@ form label.midnight-option{display:flex;align-items:center;gap:8px}form .midnigh
 .checkin-day .checkin-day-cell.is-today{outline-color:var(--habit-color,#a78bfa)}.checkin-day-cell[aria-pressed=true]{border-color:var(--habit-color,#a78bfa)}.checkin-day-cell:not(:disabled):hover,.checkin-day input.checkin-cell-input:focus{border-color:var(--habit-color,#a78bfa);outline-color:var(--habit-color,#a78bfa)}
 
 .checkin-status-icon{display:inline-flex;align-items:center;justify-content:center;width:14px;height:16px;flex:0 0 14px}.checkin-status-icon .dot{margin:0}
+
+.deliverable-item-meta .deliverable-overdue{color:#fb7185;font-weight:700}
