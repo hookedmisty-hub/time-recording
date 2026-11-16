@@ -299,3 +299,98 @@ form label.midnight-option{display:flex;align-items:center;gap:8px}form .midnigh
 
 .brand small{font-size:13px;line-height:1.5}
 .brand small .guide-link{font-size:inherit;line-height:inherit}
+
+.trend-controls{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.trend-period{display:flex;gap:6px}
+.trend-period button[aria-pressed="true"]{background:#302545;border-color:#8b6ac2;color:#d8c7ff}
+.trend-category-picker{position:relative;font-size:12px}
+.trend-category-picker summary{display:flex;align-items:center;gap:6px;cursor:pointer;padding:9px 10px;border:1px solid #34435d;border-radius:9px;color:#c0cadb;list-style:none}
+.trend-category-picker summary::-webkit-details-marker{display:none}
+.trend-category-menu{position:absolute;right:0;top:calc(100% + 6px);z-index:5;background:#192336;border:1px solid #34435d;border-radius:10px;min-width:190px;max-width:260px;max-height:300px;overflow:auto;padding:8px;box-shadow:0 8px 22px #0005}
+.trend-category-menu label{display:flex;align-items:center;gap:6px;padding:8px 4px;color:#dce5f4;cursor:pointer;overflow-wrap:anywhere}
+.trend-category-menu input{accent-color:#a78bfa;flex-shrink:0}
+.trend-category-menu .dot{flex-shrink:0;margin-right:0}
+.trend-range{font-size:12px;color:#8996ae;margin:12px 0 0}
+.trend-chart{margin-top:12px}
+
+.routine-grid{grid-template-columns:repeat(2,minmax(0,1fr));margin-top:22px}
+.routine-help{font-size:12px;color:#8996ae;line-height:1.7;margin:12px 0 0}
+.routine-mode{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px;color:#a8b4ca;margin-top:12px}
+.routine-mode select{min-width:0;max-width:100%;background:#192336;color:#dce5f4;border:1px solid #34435d;border-radius:8px;padding:7px;font:inherit}
+@media(max-width:1000px){.routine-grid{grid-template-columns:1fr}}
+
+/* Project time: compact filters and clear summary hierarchy. */
+.project-stats .project-filters{align-items:flex-end;gap:14px;padding-bottom:18px;border-bottom:1px solid #27334a}
+.project-stats .project-filters>label{flex:0 1 auto;min-width:150px}
+.project-stats .project-filters select{min-height:40px;width:100%;font-size:13px;padding:9px 12px}
+.project-stats .project-filters .project-archive-toggle{display:flex;align-items:center;gap:8px;min-height:40px;margin:0 0 0 auto;min-width:0;white-space:nowrap;cursor:pointer;font-size:12px}
+.project-stats .project-archive-toggle input[type=checkbox]{width:16px;height:16px;min-height:0;padding:0;margin:0;flex:0 0 16px;accent-color:#a78bfa}
+.project-summary{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:18px 0 4px}
+.project-summary p{margin:0;color:#8f9ab0;font-size:12px}
+.project-total{display:flex;align-items:baseline;gap:12px;white-space:nowrap}
+.project-total span{font-size:12px;color:#8f9ab0}
+.project-total strong{font-size:20px;color:#e7ecf6}
+.project-stats .project-chart{margin-top:12px}
+.project-stats .project-table th,.project-stats .project-table td{padding:11px 12px}
+.project-footnote{font-size:11px;color:#8f9ab0;line-height:1.6;margin:14px 0 0}
+@media(max-width:650px){
+ .project-stats .project-filters>label{flex:1 1 140px;min-width:0}
+ .project-stats .project-filters .project-archive-toggle{flex:1 1 100%;margin-left:0;min-height:28px}
+ .project-summary{align-items:flex-start;flex-direction:column;gap:10px}
+ .project-total strong{font-size:18px}
+}
+
+/* Keep all chart tooltips compact and consistent with chart labels. */
+.recharts-default-tooltip{font-size:12px!important;line-height:1.5!important;padding:8px 11px!important;font-weight:400}
+.recharts-default-tooltip .recharts-tooltip-label{font-size:11px!important;font-weight:600;margin:0 0 4px!important;color:#d7deec!important}
+.recharts-default-tooltip .recharts-tooltip-item{font-size:12px!important;line-height:1.5!important;padding:2px 0!important}
+.recharts-default-tooltip .recharts-tooltip-item-list{margin:0!important;padding:0!important}
+
+.checkins-card{margin:22px 0}.checkins-list{display:grid;gap:10px}.checkin-row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid #27334a}.checkin-info{display:grid;gap:7px;min-width:130px}.checkin-info strong{display:flex;align-items:center;gap:8px;font-size:14px}.checkin-info span,.checkin-info small{font-size:12px;color:#8f9ab0}.checkin-info progress{height:4px;width:150px;accent-color:#a78bfa}.checkin-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}.checkin-form{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-top:18px}.checkin-form label{display:grid;gap:7px;font-size:12px;flex:1 1 130px;min-width:0}.checkin-form input,.checkin-form select{width:100%;min-width:0;box-sizing:border-box;background:#111a29;color:#e7ecf6;border:1px solid #34435d;border-radius:8px;padding:10px;min-height:40px}.checkin-form input[type=color]{padding:4px}.checkin-week{display:flex;gap:18px}.checkin-week>span{display:grid;gap:8px;text-align:center;font-size:13px}.checkin-week small{color:#8f9ab0}.checkin-week b{color:#667085}@media(max-width:650px){.checkin-row{flex-wrap:wrap}.checkin-actions{margin-left:auto}.checkin-week{width:100%;justify-content:space-between;gap:8px}}
+
+.checkin-color-field{display:grid;gap:7px;flex:1 1 240px;min-width:0;font-size:12px;color:#a9b6cc}.checkin-palette{display:flex;align-items:center;flex-wrap:wrap;gap:8px;min-height:40px}.checkin-palette .checkin-swatch{width:26px;height:26px;min-height:26px;padding:0;border:2px solid transparent;border-radius:7px;color:#111827;font-size:15px;line-height:1;display:grid;place-items:center}.checkin-palette .checkin-swatch[aria-pressed=true]{outline:2px solid #ddd6fe;outline-offset:2px}.checkin-palette .checkin-custom-color{flex:0 0 30px;min-width:30px;margin:0}.checkin-palette .checkin-custom-color input[type=color]{width:30px;height:30px;min-height:30px;padding:3px;cursor:pointer}
+
+.checkin-row{flex-wrap:wrap}.checkin-week-grid{display:grid;grid-template-columns:repeat(7,32px);gap:7px;margin-left:auto}.checkin-day{display:grid;justify-items:center;gap:6px}.checkin-day>small{font-size:11px;color:#8f9ab0}.checkin-day .checkin-day-cell{display:grid;place-items:center;width:32px;height:32px;min-height:32px;padding:0;border:1px solid #34435d;border-radius:8px;background:#111a29;color:#8f9ab0;font-size:13px;line-height:1;font-weight:600}.checkin-day .is-today{outline:1px solid #c4b5fd;outline-offset:2px}.checkin-day .is-future{opacity:.35}.checkin-day-cell[aria-pressed=true]{border-color:#ddd6fe}.checkin-day-editor{flex:1 1 100%;display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:#111a2966;padding:10px 12px;border-radius:9px}.checkin-day-editor>span{font-size:12px;color:#a9b6cc;margin-right:auto}@media(max-width:650px){.checkin-week-grid{grid-template-columns:repeat(7,minmax(0,1fr));width:100%;order:2;margin:4px 0}.checkin-day-editor{order:3}.checkin-row>.checkin-actions{max-width:100%}}
+
+/* Shared week heading with direct cell check-ins. */
+.checkin-week-heading{display:flex;align-items:center;gap:16px;padding:8px 0 3px}.checkin-week-heading>span:first-child{flex:1;min-width:130px}.checkin-week-heading .checkin-week-grid{margin-left:0}.checkin-week-heading small{text-align:center;color:#8f9ab0;font-size:11px}.checkins-list .checkin-info{flex:1}.checkins-list .checkin-week-grid{margin-left:0}.checkin-week-heading .checkin-management-spacer{width:190px}.checkin-day-cell:not(:disabled):hover{border-color:#a78bfa;filter:brightness(1.15)}
+@media(max-width:650px){.checkin-week-heading>span:first-child,.checkin-week-heading .checkin-management-spacer{display:none}.checkin-week-heading .checkin-week-grid{margin:0}.checkin-week-heading{padding-top:12px}.checkins-list .checkin-info{flex:1 1 100%}}
+.checkin-week-heading .checkin-management-spacer{display:none}.checkins-list .checkin-actions{flex:1 1 100%;justify-content:flex-end}
+
+.checkin-day-editor label{display:flex;align-items:center;gap:12px;font-size:12px;color:#a9b6cc;margin-right:auto}.checkin-day-editor input{width:70px;min-width:0;background:#111a29;border:1px solid #34435d;border-radius:7px;color:#e7ecf6;padding:8px}
+
+/* Compact check-in editor: one control row on desktop. */
+.checkin-form{display:grid;grid-template-columns:minmax(140px,2fr) 70px minmax(110px,1.2fr) minmax(100px,1fr) minmax(100px,1fr) auto;align-items:end;gap:12px}
+.checkin-form>label,.checkin-form>.checkin-color-field{min-width:0;width:auto}
+.checkin-form:not(:has(input[placeholder="例如：正念练习"])) {align-items:end}
+.checkin-color-picker{position:relative}
+.checkin-color-picker>summary{height:40px;box-sizing:border-box;padding:7px 9px;border:1px solid #34435d;border-radius:8px;background:#111a29;display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer;list-style:none}
+.checkin-color-picker>summary::-webkit-details-marker{display:none}
+.checkin-selected-color{display:block;width:22px;height:22px;border-radius:5px;border:1px solid #ffffff25}
+.checkin-color-picker>.checkin-palette{position:absolute;top:calc(100% + 7px);left:0;z-index:20;width:190px;box-sizing:border-box;padding:12px;border:1px solid #34435d;border-radius:10px;background:#1a2538;box-shadow:0 8px 24px #0005;gap:10px}
+.checkin-form:has(select option[value="once"]:checked){grid-template-columns:minmax(140px,2fr) 70px minmax(110px,1.2fr) minmax(100px,1fr) auto}
+@media(max-width:900px){.checkin-form,.checkin-form:has(select option[value="once"]:checked){grid-template-columns:minmax(0,1fr) 70px minmax(0,1fr)}.checkin-form>button{justify-self:start}}
+@media(max-width:480px){.checkin-form,.checkin-form:has(select option[value="once"]:checked){grid-template-columns:minmax(0,1fr) 70px}.checkin-form>label:first-child{grid-column:1}.checkin-form>.checkin-color-field{grid-column:2}.checkin-form>label:nth-of-type(n+2){grid-column:1/-1}}
+
+.checkin-day input.checkin-cell-input{box-sizing:border-box;text-align:center;display:block;outline-offset:2px;caret-color:currentColor;font-family:inherit}.checkin-day input.checkin-cell-input:focus{border-color:#c4b5fd}
+
+/* Keep management icons next to the project, before the weekly cells. */
+.checkins-list .checkin-row{flex-wrap:nowrap;gap:12px}.checkins-list .checkin-info{flex:1;min-width:100px}.checkins-list .checkin-actions{flex:0 0 auto;margin-left:0;gap:2px;flex-wrap:nowrap}.checkins-list .checkin-actions .icon-btn{width:28px;min-width:28px;padding:5px}.checkins-list .checkin-week-grid{flex:0 0 auto}.checkin-week-heading .checkin-management-spacer{display:none}
+@media(max-width:650px){.checkins-list .checkin-row{flex-wrap:wrap}.checkins-list .checkin-info{flex:1;min-width:100px}.checkins-list .checkin-actions{order:0}.checkins-list .checkin-week-grid{flex:1 1 100%;order:1}}
+.checkin-color-picker>.checkin-palette{display:grid;grid-template-columns:repeat(3,30px);justify-content:center;width:134px;gap:10px}.checkin-color-picker .checkin-swatch{justify-self:center}.checkin-color-picker .checkin-custom-color{width:30px;justify-self:center}
+/* Compact habit rows with weekly progress alongside the name. */
+.checkins-list{gap:0}.checkins-list .checkin-row{padding:9px 0;gap:10px}.checkins-list .checkin-info{display:flex;align-items:center;flex-wrap:wrap;gap:6px 12px}.checkins-list .checkin-info>strong{font-size:13px}.checkins-list .checkin-info>span{font-size:11px;white-space:nowrap}.checkin-week-heading{padding-bottom:5px}.checkins-list .checkin-actions .icon-btn{width:25px;min-width:25px;padding:4px}
+@media(max-width:650px){.checkins-list .checkin-row{padding:8px 0;gap:7px}.checkins-list .checkin-week-grid{margin:2px 0}}
+
+.checkin-week-nav{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}.checkin-week-nav .import-help{margin:0}.checkin-week-nav>div{display:flex;align-items:center;gap:5px}.checkin-week-nav .secondary{font-size:11px;padding:6px 9px;min-height:30px}@media(max-width:650px){.checkin-week-nav{flex-wrap:wrap}.checkin-week-nav>div{margin-left:auto}}
+
+.checkin-form-actions{display:flex;flex-direction:column;gap:8px;align-self:start;padding-top:25px}.checkin-form-actions>button{width:100%;white-space:nowrap}@media(max-width:900px){.checkin-form-actions{padding-top:0;justify-self:end}}
+.checkin-form-actions{position:relative;padding-top:0;align-self:end}.checkin-form-actions>.secondary{position:absolute;top:calc(100% + 8px);left:0}.checkin-form:has(.checkin-form-actions>.secondary){padding-bottom:48px}
+
+/* Identical editor columns for once and multiple check-ins. */
+.checkin-form,.checkin-form:has(select option[value="once"]:checked){grid-template-columns:minmax(140px,2fr) 70px minmax(110px,1.2fr) minmax(100px,1fr) minmax(100px,1fr) auto}.checkin-form input:disabled{opacity:.5;cursor:not-allowed}
+@media(max-width:900px){.checkin-form,.checkin-form:has(select option[value="once"]:checked){grid-template-columns:minmax(0,1fr) 70px minmax(0,1fr)}}
+@media(max-width:480px){.checkin-form,.checkin-form:has(select option[value="once"]:checked){grid-template-columns:minmax(0,1fr) 70px}}
+
+/* Habit cells follow their item's color, including today's outline. */
+.checkin-day .checkin-day-cell.is-today{outline-color:var(--habit-color,#a78bfa)}.checkin-day-cell[aria-pressed=true]{border-color:var(--habit-color,#a78bfa)}.checkin-day-cell:not(:disabled):hover,.checkin-day input.checkin-cell-input:focus{border-color:var(--habit-color,#a78bfa);outline-color:var(--habit-color,#a78bfa)}
