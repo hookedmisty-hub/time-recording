@@ -286,17 +286,17 @@ function App(){
     <div className="modal-header"><h2 id="guide-title">使用指南</h2><button autoFocus className="close" aria-label="关闭使用指南" onClick={()=>setShowGuide(false)}>✕</button></div>
     <p>这个时间账本受柳比歇夫时间记录法启发。记下每项活动实际花了多久，再回顾时间用在了哪里，帮助你调整接下来的安排。</p>
     <ol className="guide-steps">
-      <li><h3>记下第一条活动</h3><p>点「添加记录」，填写活动名称、起止时间，再选择分类。</p><figure><figcaption>记录示例</figcaption><div className="guide-example"><strong>整理材料和撰写报告</strong><span>09:00 – 10:00 · 重点工作</span></div></figure></li>
+      <li><h3>记下第一条活动</h3><p>点「添加记录」，填写活动名称、起止时间，再选择分类。</p><figure><figcaption>记录示例</figcaption><div className="guide-example"><strong>整理材料和撰写报告</strong><span>09:00 – 10:00 · {coreCategory.name}</span></div></figure></li>
       <li><h3>拆分重点工作</h3><p>如果这一小时里有 45 分钟用来做直接推进目标的工作，就填 45 分钟「{coreCategory.name}」。余下的 15 分钟自动计入「{auxCategory.name}」。两项都可以在「分类管理」中改名。</p><figure><figcaption>60 分钟如何分配</figcaption><div className="guide-split" aria-hidden="true"><span style={{background:coreCategory.color}}/><span style={{background:auxCategory.color}}/></div><div className="guide-example"><span>{coreCategory.name} · 45 分钟</span><span>{auxCategory.name} · 15 分钟</span></div></figure></li>
-      <li><h3>回顾时间分配</h3><p>「历史记录」按日期查看活动，「统计分析」比较各项目的用时。</p><div className="guide-example" aria-label="回顾入口"><span>历史记录 → 按日期回顾</span><span>统计分析 → 项目用时</span></div></li>
+      <li><h3>回顾时间分配</h3><p>「历史记录」按日期查看、补录和修改活动。「统计分析」可查看近 7 天或整月的分类用时趋势、项目投入，以及睡眠作息和每日启动时间；通过下拉菜单选择要比较的分类。</p><div className="guide-example" aria-label="回顾入口"><span>历史记录 → 查看具体条目</span><span>统计分析 → 观察投入与作息规律</span></div></li>
       <li><h3>备份与恢复</h3>
         <ul className="guide-backup-options">
           <li><strong>云端备份：</strong>打开「管理设置 → 账号与云同步」，登录并按提示启用加密同步，保存好加密口令与恢复密钥。换设备时登录同一账号，用原加密口令解锁即可同步账本；需要手动更新时，点击「检查更新」。</li>
-          <li><strong>本地备份：</strong>点击「管理设置 → 一键导出」保存 JSON 文件。恢复时，到「历史记录 → 导入 JSON」选择备份并确认；如需一起恢复奖励规则等设置，勾选「同时恢复目标、奖励、待办与个性化设置」。</li>
+          <li><strong>本地备份：</strong>点击「管理设置 → 一键导出」保存 JSON 文件。恢复时，到「历史记录 → 导入 JSON」选择备份并确认；如需一起恢复打卡项目、打卡记录、奖励规则等设置，勾选「同时恢复目标、奖励、待办与个性化设置」。</li>
         </ul>
       </li>
     </ol>
-    <p>熟悉记录后，可以在首页设置每日工作目标和待办，也可以在「心愿奖励」设置与查看奖励规则。有明确成果或截止时间的任务，还可以用「交付任务」管理，并关联时间记录。</p>
+    <p>熟悉记录后，可以在首页设置每日工作目标和待办，用「快捷打卡」记录习惯完成次数与每周进度，也可以在「心愿奖励」设置与查看奖励规则。有明确成果或截止时间的任务，还可以用「交付任务」管理，并关联时间记录。</p>
     <div className="actions"><button className="primary" onClick={()=>{setShowGuide(false);openNew()}}>添加第一条记录</button></div>
   </section></div>}
   {showRewardRules&&tab==='rewards'&&<RewardRules categories={categories} state={rewards} today={today} onClose={()=>setShowRewardRules(false)}/>}
