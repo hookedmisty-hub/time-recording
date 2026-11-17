@@ -18,8 +18,9 @@ export function parseBackup(text) {
     if (r.project != null && typeof r.project !== 'string') fail('研究项目必须是文本。')
     if (r.coreMinutes != null && (!Number.isInteger(r.coreMinutes)||r.coreMinutes<0||r.coreMinutes>recordMinutes(r))) fail('核心分钟数必须是 0 到活动总分钟数之间的整数。')
     if (r.deliverableId != null && (typeof r.deliverableId !== 'string' || !r.deliverableId.trim())) fail('交付项 ID 无效。')
+    if(r.planId!=null&&(typeof r.planId!=='string'||!r.planId.trim()))fail('计划 ID 无效。')
     if (r.note != null && typeof r.note !== 'string') fail('备注必须是文本。')
-    return {id:r.id,title:r.title,date:r.date,start:r.start,end:r.end,category:r.category,project:r.project ?? '',note:r.note ?? '',...(r.deliverableId?{deliverableId:r.deliverableId}:{}),...(r.coreMinutes!=null?{coreMinutes:r.coreMinutes}:{}),...(r.categoryColor?{categoryColor:r.categoryColor}:{}),...(r.categoryKind?{categoryKind:r.categoryKind}:{})}
+    return {...(r.planId?{planId:r.planId}:{}),id:r.id,title:r.title,date:r.date,start:r.start,end:r.end,category:r.category,project:r.project ?? '',note:r.note ?? '',...(r.deliverableId?{deliverableId:r.deliverableId}:{}),...(r.coreMinutes!=null?{coreMinutes:r.coreMinutes}:{}),...(r.categoryColor?{categoryColor:r.categoryColor}:{}),...(r.categoryKind?{categoryKind:r.categoryKind}:{})}
   })
 }
 const interval = r => {
