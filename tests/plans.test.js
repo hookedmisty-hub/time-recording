@@ -44,7 +44,39 @@ test('LOG edits existing linked records rather than creating overlapping duplica
  const {planLogAction}=await import('../src/plans.js')
  const record={id:'r1',planId:'p1',title:'报告',date:'2026-11-17',start:'09:15',end:'09:55',note:'实际备注'}
  const records=[record,{id:'r2',planId:'different',title:'报告',date:'2026-11-17',start:'11:00',end:'12:00'}]
- const action=planLogAction('p1',records);assert.equal(action.type,'edit');assert.equal(action.records[0].id,'r1');assert.equal(action.records[0].start,'09:15');assert.equal(action.records[0].note,'实际备注');assert.equal(records.length,2)
- assert.equal(planLogAction('new',records).type,'create')
- assert.equal(planLogAction('p1',[...records,{...record,id:'r3',start:'10:00',end:'10:30'}]).type,'choose')
+ const action=planLogAction({date:'2026-11-17',start:'09:00',end:'11:00'},records);assert.equal(action.type,'edit');assert.equal(action.records[0].id,'r1');assert.equal(action.records[0].start,'09:15');assert.equal(action.records[0].note,'实际备注');assert.equal(records.length,2)
+ assert.equal(planLogAction({date:'2026-11-18',start:'09:00',end:'11:00'},records).type,'create')
+ assert.equal(planLogAction({date:'2026-11-17',start:'09:00',end:'11:00'},[...records,{...record,id:'r3',start:'10:00',end:'10:30'}]).type,'choose')
+})
+
+test('overlap links all plans and handles overnight records without linking touching edges',async()=>{
+ const {planOverlapsRecord}=await import('../src/plans.js')
+ const plan={date:'2026-11-17',start:'09:00',end:'10:00'}
+ assert.equal(planOverlapsRecord(plan,{date:plan.date,start:'08:30',end:'09:01'}),true)
+ assert.equal(planOverlapsRecord(plan,{date:plan.date,start:'10:00',end:'11:00'}),false)
+ assert.equal(planOverlapsRecord(plan,{date:plan.date,start:'08:00',end:'09:00'}),false)
+ assert.equal(planOverlapsRecord({date:'2026-11-18',start:'00:00',end:'01:00'},{date:'2026-11-17',start:'23:00',end:'00:30'}),true)
+ assert.equal(planOverlapsRecord({date:'2026-11-18',start:'00:00',end:'01:00'},{date:'2026-11-17',start:'23:00',end:'24:00'}),false)
+})
+test('plan task execution belongs to one log and returns to all logs when pending',async()=>{
+ const {tasksForLog,assignPlanTask}=await import('../src/plans.js')
+ const records=[{id:'a',date:'2026-11-17',start:'09:00',end:'09:30'},{id:'b',date:'2026-11-17',start:'10:00',end:'10:30'}]
+ let plan=p()
+ assert.equal(tasksForLog(plan,'a',records).length,1);assert.equal(tasksForLog(plan,'b',records).length,1)
+ plan=assignPlanTask(plan,'t1','done','b');validatePlans([plan])
+ assert.equal(plan.tasks.length,1);assert.equal(tasksForLog(plan,'a',records).length,0);assert.equal(tasksForLog(plan,'b',records).length,1)
+ plan=assignPlanTask(plan,'t1','cancelled','b');assert.equal(tasksForLog(plan,'a',records).length,0)
+ plan=assignPlanTask(plan,'t1','pending','b');assert.equal(tasksForLog(plan,'a',records).length,1);assert.equal(tasksForLog(plan,'b',records).length,1)
+})
+test('independent LOG tasks and plan execution ownership survive backup and cloud merge',async()=>{
+ const {assignPlanTask}=await import('../src/plans.js')
+ const plan=assignPlanTask(p(),'t1','done','r1')
+ const r={id:'r1',title:'报告',date:'2026-11-17',start:'09:00',end:'10:00',category:DEFAULT_CATEGORIES[0].name,logTasks:[{id:'own1',text:'独立补充',status:'done',statusAt:new Date().toISOString()}]}
+ const base={records:[],categories:DEFAULT_CATEGORIES,projects:DEFAULT_PROJECTS,deliverables:[],goals:{},todos:{},rewards:defaultRewards()}
+ const journal={...base,records:[r],preferences:{subtitle:'test',plans:[plan]}}
+ const restored=parseBundle(JSON.stringify({...journal,version:'1.4'}))
+ assert.equal(restored.records[0].logTasks[0].text,'独立补充');assert.equal(restored.settings.preferences.plans[0].tasks[0].executionLogId,'r1')
+ const merged=mergeJournal(base,journal,base).journal
+ assert.equal(merged.records[0].logTasks[0].status,'done');assert.equal(merged.preferences.plans[0].tasks.length,1)
+ assert.throws(()=>parseBundle(JSON.stringify({...journal,version:'1.4',records:[{...r,logTasks:[{id:'x',text:'',status:'done'}]}]})))
 })
