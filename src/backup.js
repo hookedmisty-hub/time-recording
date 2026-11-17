@@ -1,3 +1,4 @@
+import {validateLogTasks} from './plans.js'
 import {recordMinutes} from './research.js'
 const TIME = /^(?:[01]\d|2[0-3]):[0-5]\d$/
 export function parseBackup(text) {
@@ -20,7 +21,8 @@ export function parseBackup(text) {
     if (r.deliverableId != null && (typeof r.deliverableId !== 'string' || !r.deliverableId.trim())) fail('交付项 ID 无效。')
     if(r.planId!=null&&(typeof r.planId!=='string'||!r.planId.trim()))fail('计划 ID 无效。')
     if (r.note != null && typeof r.note !== 'string') fail('备注必须是文本。')
-    return {...(r.planId?{planId:r.planId}:{}),id:r.id,title:r.title,date:r.date,start:r.start,end:r.end,category:r.category,project:r.project ?? '',note:r.note ?? '',...(r.deliverableId?{deliverableId:r.deliverableId}:{}),...(r.coreMinutes!=null?{coreMinutes:r.coreMinutes}:{}),...(r.categoryColor?{categoryColor:r.categoryColor}:{}),...(r.categoryKind?{categoryKind:r.categoryKind}:{})}
+    const logTasks=r.logTasks==null?undefined:validateLogTasks(r.logTasks)
+    return {...(logTasks?{logTasks}:{}),...(r.planId?{planId:r.planId}:{}),id:r.id,title:r.title,date:r.date,start:r.start,end:r.end,category:r.category,project:r.project ?? '',note:r.note ?? '',...(r.deliverableId?{deliverableId:r.deliverableId}:{}),...(r.coreMinutes!=null?{coreMinutes:r.coreMinutes}:{}),...(r.categoryColor?{categoryColor:r.categoryColor}:{}),...(r.categoryKind?{categoryKind:r.categoryKind}:{})}
   })
 }
 const interval = r => {
@@ -28,7 +30,7 @@ const interval = r => {
   const base = Date.parse(`${r.date}T00:00:00`)/60000
   return [base+mins(r.start),base+mins(r.end)+(r.end<r.start?1440:0)]
 }
-const sameRecord = (a,b) => ['title','date','start','end','category','project','note','coreMinutes','deliverableId'].every(key=>(a[key]??'')===(b[key]??''))
+const sameRecord = (a,b) => ['title','date','start','end','category','project','note','coreMinutes','deliverableId'].every(key=>(a[key]??'')===(b[key]??''))&&JSON.stringify(a.logTasks||[])===JSON.stringify(b.logTasks||[])
 export function planImport(existing, incoming, choices={}) {
   const current = new Map(existing.map(r=>[r.id,r])), seen = new Set(), additions=[], conflicts=[], updates=[]
   let duplicates=0, fileDuplicates=0

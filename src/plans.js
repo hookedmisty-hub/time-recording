@@ -9,7 +9,7 @@ export function validatePlans(value){
   for(const field of ['categoryId','projectId','deliverableId'])if(p[field]!=null&&typeof p[field]!=='string')throw new Error('计划关联无效。')
   if(p.notes!=null&&(typeof p.notes!=='string'||p.notes.length>20000))throw new Error('计划笔记过长或无效。')
   ids.add(p.id)
-  for(const t of p.tasks){if(!t||typeof t.id!=='string'||!t.id||taskIds.has(t.id)||typeof t.text!=='string'||!t.text.trim()||t.text.length>200||!['pending','done','cancelled','deferred'].includes(t.status)||(t.deferredTo!=null&&!validDate(t.deferredTo)))throw new Error('计划待办无效。');if(t.statusAt!=null&&!Number.isFinite(Date.parse(t.statusAt)))throw new Error('待办操作时间无效。');if(t.history!=null&&(!Array.isArray(t.history)||t.history.some(h=>!h||!['pending','done','cancelled','deferred'].includes(h.status)||!Number.isFinite(Date.parse(h.at)))))throw new Error('待办执行历史无效。');taskIds.add(t.id)}
+  for(const t of p.tasks){if(!t||typeof t.id!=='string'||!t.id||taskIds.has(t.id)||typeof t.text!=='string'||!t.text.trim()||t.text.length>200||!['pending','done','cancelled','deferred'].includes(t.status)||(t.deferredTo!=null&&!validDate(t.deferredTo)))throw new Error('计划待办无效。');if(t.statusAt!=null&&!Number.isFinite(Date.parse(t.statusAt)))throw new Error('待办操作时间无效。');if(t.history!=null&&(!Array.isArray(t.history)||t.history.some(h=>!h||!['pending','done','cancelled','deferred'].includes(h.status)||!Number.isFinite(Date.parse(h.at)))))throw new Error('待办执行历史无效。');if(t.executionLogId!=null&&(typeof t.executionLogId!=='string'||!t.executionLogId))throw new Error('待办关联记录无效。');taskIds.add(t.id)}
  }
  return structuredClone(value)
 }
@@ -31,7 +31,33 @@ export function planLanes(blocks){
  return groups.flatMap(g=>g.blocks.map(b=>({...b,columns:g.ends.length})))
 }
 
-export function planLogAction(planId,records){
- const linked=records.filter(r=>r.planId===planId).sort((a,b)=>`${a.date} ${a.start}`.localeCompare(`${b.date} ${b.start}`)||a.id.localeCompare(b.id))
+// Compare absolute local calendar times; touching endpoints are not overlap.
+export function planOverlapsRecord(plan,record){
+ const interval=x=>{
+  const [y,m,d]=x.date.split('-').map(Number)
+  const start=planMinutes(x.start),end=planMinutes(x.end)
+  return [new Date(y,m-1,d,0,start).getTime(),new Date(y,m-1,d+(end<start?1:0),0,end).getTime()]
+ }
+ const [a,b]=interval(plan),[c,d]=interval(record)
+ return a<d&&c<b
+}
+export function planLogAction(plan,records){
+ const linked=records.filter(r=>planOverlapsRecord(plan,r)).sort((a,b)=>`${a.date} ${a.start}`.localeCompare(`${b.date} ${b.start}`)||a.id.localeCompare(b.id))
  return {type:linked.length===0?'create':linked.length===1?'edit':'choose',records:linked}
+}
+
+export function tasksForLog(plan,logId,records){
+ const linked=planLogAction(plan,records).records
+ return plan.tasks.filter(t=>t.status==='pending'||(t.executionLogId||linked[0]?.id)===logId)
+}
+export function assignPlanTask(plan,taskId,status,logId){
+ const at=new Date().toISOString()
+ return {...plan,tasks:plan.tasks.map(t=>t.id===taskId?{...t,status,executionLogId:status==='pending'?undefined:logId,statusAt:at,history:[...(t.history||[]),{status,at,...(logId?{logId}:{})}]}:t)}
+}
+export function validateLogTasks(tasks){
+ if(tasks==null)return []
+ if(!Array.isArray(tasks)||tasks.length>30)throw new Error('LOG 待办无效。')
+ const ids=new Set()
+ for(const t of tasks){if(!t||typeof t.id!=='string'||!t.id||ids.has(t.id)||typeof t.text!=='string'||!t.text.trim()||t.text.length>200||!['pending','done','cancelled'].includes(t.status)||(t.statusAt!=null&&!Number.isFinite(Date.parse(t.statusAt))))throw new Error('LOG 待办无效。');ids.add(t.id)}
+ return structuredClone(tasks)
 }
