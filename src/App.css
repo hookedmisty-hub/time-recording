@@ -22,6 +22,12 @@ form label.midnight-option{display:flex;align-items:center;gap:8px}form .midnigh
 .daily-planning{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:22px;margin-bottom:24px}.daily-planning>.daily-goal{margin-bottom:0}.daily-planning .card-title{flex-wrap:wrap}.daily-planning .goal-form{grid-template-columns:1fr 1fr}.daily-planning .goal-form label:first-child{grid-column:1/-1}.daily-planning .goal-form button{justify-content:center}.todo-form{grid-template-columns:minmax(0,1fr) auto;gap:10px}.todo-list{list-style:none;padding:0;margin:16px 0 0}.todo-list li{display:flex;align-items:center;gap:8px;padding:12px 0;border-top:1px solid #27334a}.todo-list label{display:flex;align-items:flex-start;gap:10px;flex:1;min-width:0;font-size:14px;line-height:1.6;cursor:pointer}.todo-list input{accent-color:#a78bfa;width:17px;height:17px;flex-shrink:0;margin-top:3px}.todo-list span{overflow-wrap:anywhere}.todo-done span{text-decoration:line-through;color:#8290a8}.todo-empty{font-size:13px;color:#8290a8;line-height:1.8;margin-top:22px}@media(max-width:1000px){.daily-planning{grid-template-columns:1fr}}@media(max-width:650px){.daily-planning .goal-form{grid-template-columns:1fr}}
 
 .overview-date-controls{display:flex;align-items:center;gap:8px}.overview-date-controls .secondary{white-space:nowrap}.overview-date-controls .date-input{min-width:0}@media(max-width:420px){.topline:has(.overview-date-controls){flex-wrap:wrap;gap:12px}.overview-date-controls{margin-left:auto}}
+.overview-date-toolbar{justify-content:flex-end}
+.overview-date-toolbar .overview-date-controls{flex-wrap:wrap;justify-content:flex-end}
+.overview-date-stepper{display:flex;align-items:center;gap:3px}
+.overview-date-stepper .icon-btn{display:grid;place-items:center;width:30px;height:40px;border-radius:8px;color:#a9b6cc}
+.overview-date-stepper .icon-btn:hover,.overview-date-stepper .icon-btn:focus-visible{background:#202b3e;color:#e7ecf6}
+
 
 .streak-banner{color:#6ee7b7;font-size:19px;font-weight:800;margin:14px 0 0}.record-calendar{position:relative}.record-calendar>.date-input{display:flex;align-items:center;gap:15px;cursor:pointer}.calendar-panel{position:absolute;right:0;top:calc(100% + 10px);width:min(330px,calc(100vw - 30px));background:#182234;border:1px solid #40516e;border-radius:14px;padding:16px;z-index:5;box-shadow:0 16px 40px #0007}.calendar-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}.calendar-heading label{font-size:11px;color:#acb9d0}.calendar-heading input{display:block;background:#111a29;color:#e8ecf5;color-scheme:dark;border:1px solid #40516e;border-radius:7px;padding:7px;max-width:180px}.calendar-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;text-align:center}.calendar-days>span{font-size:12px;color:#9aa6bd;padding:6px 0}.calendar-days>button{height:34px;border:1px solid transparent;border-radius:7px;background:transparent;color:#dce5f4;font-size:13px}.calendar-days>button.has-records{background:#4c3978;color:#f5efff;font-weight:800}.calendar-days>button.outside-month{opacity:.45}.calendar-days>button.selected-day{outline:2px solid #c4b5fd;outline-offset:1px}.calendar-days>button:focus-visible{outline:2px solid white}.calendar-days>button:hover{border-color:#c4b5fd}
 
@@ -307,6 +313,8 @@ form label.midnight-option{display:flex;align-items:center;gap:8px}form .midnigh
 .trend-category-picker summary{display:flex;align-items:center;gap:6px;cursor:pointer;padding:9px 10px;border:1px solid #34435d;border-radius:9px;color:#c0cadb;list-style:none}
 .trend-category-picker summary::-webkit-details-marker{display:none}
 .trend-category-menu{position:absolute;right:0;top:calc(100% + 6px);z-index:5;background:#192336;border:1px solid #34435d;border-radius:10px;min-width:190px;max-width:260px;max-height:300px;overflow:auto;padding:8px;box-shadow:0 8px 22px #0005}
+.routine-trend .trend-category-picker{margin-inline-start:auto}
+.routine-trend .trend-category-menu{width:max-content;min-width:100%;max-width:min(220px,calc(100vw - 72px))}
 .trend-category-menu label{display:flex;align-items:center;gap:6px;padding:8px 4px;color:#dce5f4;cursor:pointer;overflow-wrap:anywhere}
 .trend-category-menu input{accent-color:#a78bfa;flex-shrink:0}
 .trend-category-menu .dot{flex-shrink:0;margin-right:0}
@@ -314,7 +322,6 @@ form label.midnight-option{display:flex;align-items:center;gap:8px}form .midnigh
 .trend-chart{margin-top:12px}
 
 .routine-grid{grid-template-columns:repeat(2,minmax(0,1fr));margin-top:22px}
-.routine-help{font-size:12px;color:#8996ae;line-height:1.7;margin:12px 0 0}
 .routine-mode{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px;color:#a8b4ca;margin-top:12px}
 .routine-mode select{min-width:0;max-width:100%;background:#192336;color:#dce5f4;border:1px solid #34435d;border-radius:8px;padding:7px;font:inherit}
 @media(max-width:1000px){.routine-grid{grid-template-columns:1fr}}
@@ -327,17 +334,15 @@ form label.midnight-option{display:flex;align-items:center;gap:8px}form .midnigh
 .project-stats .project-archive-toggle input[type=checkbox]{width:16px;height:16px;min-height:0;padding:0;margin:0;flex:0 0 16px;accent-color:#a78bfa}
 .project-summary{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:18px 0 4px}
 .project-summary p{margin:0;color:#8f9ab0;font-size:12px}
-.project-total{display:flex;align-items:baseline;gap:12px;white-space:nowrap}
+.project-total{display:flex;align-items:baseline;gap:7px;white-space:nowrap}
 .project-total span{font-size:12px;color:#8f9ab0}
-.project-total strong{font-size:20px;color:#e7ecf6}
+.project-total strong{font-size:14px;color:#e7ecf6}
 .project-stats .project-chart{margin-top:12px}
 .project-stats .project-table th,.project-stats .project-table td{padding:11px 12px}
-.project-footnote{font-size:11px;color:#8f9ab0;line-height:1.6;margin:14px 0 0}
 @media(max-width:650px){
  .project-stats .project-filters>label{flex:1 1 140px;min-width:0}
  .project-stats .project-filters .project-archive-toggle{flex:1 1 100%;margin-left:0;min-height:28px}
  .project-summary{align-items:flex-start;flex-direction:column;gap:10px}
- .project-total strong{font-size:18px}
 }
 
 /* Keep all chart tooltips compact and consistent with chart labels. */
@@ -521,4 +526,9 @@ form label.midnight-option{display:flex;align-items:center;gap:8px}form .midnigh
 .calendar-move-announcement{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
 
 
-.sleep-target-control{display:flex;align-items:center;gap:6px;font-size:12px;color:#aab6ca;white-space:nowrap}.sleep-target-control input{width:66px;min-width:0;padding:7px 8px;font-size:12px}
+.sleep-target-control{display:flex;align-items:center;gap:5px;margin-inline-start:auto;font-size:12px;color:#aab6ca;white-space:nowrap}
+.sleep-target-control strong{color:#e7ecf6;margin-inline-start:4px}
+.sleep-target-control label{display:flex;align-items:center;gap:6px;font-weight:400;color:inherit}
+.sleep-target-control input{width:60px;min-width:0;padding:6px 7px;border-radius:7px}
+.sleep-target-control .icon-btn{display:grid;place-items:center;width:24px;height:28px;padding:3px;color:#aab6ca;border-radius:6px}
+.sleep-target-control .icon-btn:hover,.sleep-target-control .icon-btn:focus-visible{color:#d8c7ff;background:#a78bfa1f}
