@@ -10,6 +10,11 @@ export function routineTimeLabel(value){
  const offset=Math.floor(value/DAY)
  return `${offset<0?(offset===-1?'前日':`前${-offset}日`):offset>0?(offset===1?'次日':`后${offset}日`):''}${routineClock(value)}`
 }
+export function sleepTimeLabel(value){
+ const minute=((Math.round(value)%DAY)+DAY)%DAY
+ const hour=Math.floor(minute/60)
+ return `${hour%12||12}:${String(minute%60).padStart(2,'0')} ${hour>=12?'PM':'AM'}`
+}
 export function sleepSeries(records,categories,days,ids,mode='longest'){
  const names=new Set(categories.filter(c=>ids.includes(c.id)).map(c=>c.name))
  const intervals=records.filter(r=>names.has(r.category)).map(r=>{
