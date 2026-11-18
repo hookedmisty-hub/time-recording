@@ -4,11 +4,12 @@ import {Plus,Trash2,X,Pencil} from 'lucide-react'
 import TemporalInput from './TemporalInput.jsx'
 import {planMinutes,savePlan,planLanes,planLogAction,planOverlapsRecord,tasksForLog,assignPlanTask} from './plans.js'
 const clock=m=>`${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`
-export default function PlanLog({date,today,plans=[],records,daily,categories,projects,deliverables,onChange,onLog,onEditLog,onLogTasks,recordEditor=null,recordAnchor=null,onDismissRecord}){
+export default function PlanLog({date,today,plans=[],records,daily,categories,projects,deliverables,onChange,onLog,onEditLog,onLogTasks,recordEditor=null,recordAnchor=null,onDismissRecord,openRequest=null,onRequestHandled}){
  const [draft,setDraft]=useState(null),[text,setText]=useState(''),[error,setError]=useState(''),[now,setNow]=useState(()=>new Date())
  const [taskEdit,setTaskEdit]=useState(null)
  const [logChoices,setLogChoices]=useState(null)
  const [selected,setSelected]=useState(null),[zoom,setZoom]=useState(3.6)
+ useEffect(()=>{if(openRequest){setDraft(structuredClone(openRequest));setText('');setError('');setTaskEdit(null);setLogChoices(null);onRequestHandled?.()}},[openRequest,onRequestHandled])
  const selectedPlan=plans.find(p=>p.id===selected&&p.date===date)
  const quickStatus=(p,t,status,logId)=>{const next=assignPlanTask(p,t.id,status,logId);if(draft?.id===p.id)setDraft(next);if(plans.some(x=>x.id===p.id)){try{persist(savePlan(plans,next))}catch(e){setError(e.message)}}}
 
