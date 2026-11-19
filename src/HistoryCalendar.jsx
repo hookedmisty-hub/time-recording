@@ -1,3 +1,4 @@
+import {isWorkRole} from './categories.js'
 import CalendarPlanEditor from './CalendarPlanEditor.jsx'
 import CalendarDetail from './CalendarDetail.jsx'
 import {useEffect,useRef,useState} from 'react'
@@ -86,9 +87,19 @@ export default function HistoryCalendar({date,onDateChange,events=[],onEventsCha
  const tags=(category,project)=><div className="calendar-tags">{category&&<span>{category}</span>}{project&&<span>{project}</span>}</div>
  const dayBlocks=day=>{
   const p=plans.filter(p=>p.date===day).map(p=>({id:'plan:'+p.id,a:calendarMinutes(p.start),b:calendarMinutes(p.end),title:p.title,kind:'PLAN',color:categories.find(c=>c.id===p.categoryId)?.color||'#a78bfa',category:categories.find(c=>c.id===p.categoryId)?.name,project:projects.find(x=>x.id===p.projectId)?.name,plan:p,open:()=>openPlanDetail(p)}))
-  const r=records.flatMap(r=>{const segment=recordCalendarSegment(r,day);return segment?[{id:'log:'+r.id,...segment,title:r.title,kind:'LOG',color:categories.find(c=>c.name===r.category)?.color||'#94a3b8',category:r.category,project:r.project,open:()=>setDetail({kind:'log',item:r})}]:[]})
+  const logs=records.flatMap(record=>{
+   const segment=recordCalendarSegment(record,day)
+   if(!segment)return []
+   const category=categories.find(c=>c.name===record.category)
+   return [{
+    id:'log:'+record.id,...segment,title:record.title,kind:'LOG',
+    color:category?.color||'#94a3b8',category:record.category,
+    project:isWorkRole(category?.kind)?record.project:undefined,
+    open:()=>setDetail({kind:'log',item:record}),
+   }]
+  })
   const e=all.filter(e=>e.date===day&&!e.allDay).map(e=>({id:e.id,a:calendarMinutes(e.start),b:e.kind==='deadline'?Math.min(1440,calendarMinutes(e.start)+30):calendarMinutes(e.end),title:e.title,kind:e.kind==='deadline'?'DDL':'日程',color:eventColor(e),event:e,open:()=>open(e)}))
-  const lanes=[...planLanes(p).map(x=>({...x,side:0})),...planLanes(r).map(x=>({...x,side:1})),...planLanes(e).map(x=>({...x,side:null}))]
+  const lanes=[...planLanes(p).map(x=>({...x,side:0})),...planLanes(logs).map(x=>({...x,side:1})),...planLanes(e).map(x=>({...x,side:null}))]
   return lanes.map(x=><button type="button" key={x.id} draggable={false} onPointerDown={event=>{if(x.plan)startPlanDrag(event,x.plan,'week');else if(x.event)startPlanDrag(event,x.event,'week','event')}} data-calendar-event={x.id} className={`calendar-week-block${highlightId===x.id?' is-highlighted':''} ${x.kind==='PLAN'?'is-plan':''} ${dragId===(x.plan?`plan:${x.plan.id}`:x.event?`event:${x.event.id}`:'')?'is-dragging':''} ${x.side===null?'is-schedule':''}`} style={{top:x.a,height:Math.max(30,x.b-x.a),left:`calc(${x.side===null?x.lane/x.columns*100:x.side*50+x.lane/x.columns*50}% + 2px)`,width:`calc(${(x.side===null?100:50)/x.columns}% - 4px)`,'--event-color':x.color}} onClick={x.open}><strong className={x.side===null?'calendar-schedule-title':undefined}>{x.side===null&&(x.kind==='DDL'?<Flag size={13} aria-hidden="true"/>:<CalendarDays size={13} aria-hidden="true"/>)}{x.title}</strong>{tags(x.category,x.project)}</button>)
  }
  return <><div className="history-calendar-shell"><section className="card history-calendar"><div className="calendar-tab-bar"><div className="calendar-view-switch">{[['month','月'],['week','周'],['day','日']].map(([id,name])=><button type="button" className={`calendar-tab ${view===id?'active':''}`} aria-pressed={view===id} key={id} onClick={()=>setView(id)}>{name}视图</button>)}</div><div className="calendar-tab-actions">{view==='week'&&<button type="button" className="calendar-tab" onClick={()=>createPlan(date,'09:00')}><Plus size={15}/>添加计划</button>}<button type="button" className="calendar-tab calendar-add-event" onClick={()=>create()}><Plus size={15}/>添加事件</button></div></div><div className="history-calendar-toolbar"><div className="calendar-navigation"><button type="button" className="icon-btn" aria-label="上一段日期" onClick={()=>move(-1)}><ChevronLeft size={18}/></button><strong>{view==='month'?date.slice(0,7):view==='week'?`${week[0]} — ${week[6]}`:date}</strong><button type="button" className="icon-btn" aria-label="下一段日期" onClick={()=>move(1)}><ChevronRight size={18}/></button><button type="button" className="secondary" onClick={()=>onDateChange(calendarDate())}>回到今天</button><TemporalInput aria-label="日历日期" type="date" value={date} onChange={e=>{if(e.target.value)onDateChange(e.target.value)}}/></div></div>
