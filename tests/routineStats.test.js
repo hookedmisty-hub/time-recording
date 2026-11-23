@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import {sleepSeries,workStartSeries,routineTimeLabel,defaultRoutineCategories} from '../src/routineStats.js'
+import {sleepSeries,workDurationSeries,workStartSeries,routineTimeLabel,defaultRoutineCategories} from '../src/routineStats.js'
 const categories=[{id:'休息睡眠',name:'睡觉',kind:'other'},{id:'核心科研',name:'核心',kind:'core'},{id:'工作事务',name:'事务',kind:'other'},{id:'辅助科研',name:'辅助',kind:'research'}]
 const r=(date,start,end,category,coreMinutes)=>({date,start,end,category,...(coreMinutes!==undefined?{coreMinutes}:{})})
 test('sleep joins midnight-adjacent records and assigns longest sleep to wake date',()=>{
@@ -32,4 +32,26 @@ test('category starts ignore midnight continuations but retain genuine midnight 
  assert.equal(categoryStartSeries(records,categories,['2026-11-16'],['工作事务'])[0]['工作事务'],540)
  assert.equal(categoryStartSeries([r('2026-11-16','00:00','01:00','事务')],categories,['2026-11-16'],['工作事务'])[0]['工作事务'],0)
  assert.equal(categoryStartSeries([r('2026-11-15','23:00','01:00','事务')],categories,['2026-11-16'],['工作事务'])[0]['工作事务'],null)
+})
+
+test('each wake date pairs the previous evening bedtime with that morning',()=>{
+ const records=[r('2026-11-13','23:00','07:00','睡觉'),r('2026-11-14','23:30','07:00','睡觉')]
+ const rows=sleepSeries(records,categories,['2026-11-13','2026-11-14','2026-11-15'],['休息睡眠'])
+ assert.deepEqual(rows,[{date:'2026-11-13',bedtime:null,wake:null},{date:'2026-11-14',bedtime:-60,wake:420},{date:'2026-11-15',bedtime:-30,wake:420}])
+})
+
+test('work duration uses each day’s goal and counts overlapping or cross-midnight work correctly',()=>{
+ const records=[
+  r('2026-11-17','20:00','01:00','核心',120),
+  r('2026-11-18','09:00','13:00','辅助'),
+  r('2026-11-18','12:00','13:00','核心'),
+  r('2026-11-18','13:00','14:00','事务'),
+ ]
+ const days=['2026-11-17','2026-11-18','2026-11-19']
+ const goals={'2026-11-17':{minutes:360},'2026-11-19':{minutes:420}}
+ assert.deepEqual(workDurationSeries(records,categories,days,goals),[
+  {minutes:240,targetMinutes:360},
+  {minutes:300,targetMinutes:300},
+  {minutes:null,targetMinutes:420},
+ ])
 })
