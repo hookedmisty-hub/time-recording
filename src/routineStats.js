@@ -1,4 +1,5 @@
 import {researchAllocation} from './research.js'
+import {dailyResearch,effectiveGoal} from './rewards.js'
 const DAY=1440
 const dayStart=date=>Date.parse(`${date}T00:00:00Z`)/60000
 const clock=text=>Number(text.slice(0,2))*60+Number(text.slice(3))
@@ -33,6 +34,13 @@ export function sleepSeries(records,categories,days,ids,mode='longest'){
   const block=mode==='all'?{start:Math.min(...candidates.map(b=>b.start)),end:Math.max(...candidates.map(b=>b.end))}:candidates.reduce((best,b)=>b.end-b.start>best.end-best.start?b:best)
   return {date,bedtime:block.start-start,wake:block.end-start}
  })
+}
+export function workDurationSeries(records,categories,days,goals){
+ const totals=dailyResearch(records,categories)
+ return days.map(date=>({
+  minutes:totals[date]??null,
+  targetMinutes:effectiveGoal(goals?.[date]),
+ }))
 }
 export function workStartSeries(records,categories,days,businessIds){
  const kinds=new Map(categories.map(c=>[c.name,c.kind]))
