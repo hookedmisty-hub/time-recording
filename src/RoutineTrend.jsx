@@ -59,7 +59,7 @@ export default function RoutineTrend({type,records,categories,goals,date,setting
   if(change({sleepTargetHours:hours}))setTargetDraft(null)
  }
  return <section className="card routine-trend">
-  <div className="card-title"><h2>{sleep?'睡眠作息':'启动时间'}</h2><span>时间点 / 小时</span></div>
+  <div className="card-title"><h2>{sleep?'睡眠作息':'启动时间'}</h2><span>{sleep?'时间点 / 小时':'左轴 启动时刻 · 右轴 工时'}</span></div>
   <div className="trend-controls"><div className="trend-period" role="group" aria-label={sleep?'睡眠统计范围':'工作开始统计范围'}><button className="secondary" aria-pressed={period==='week'} onClick={()=>setPeriod('week')}>近 7 天</button><button className="secondary" aria-pressed={period==='month'} onClick={()=>setPeriod('month')}>月分布</button></div>
    {sleep&&(targetDraft===null
     ? <div className="sleep-target-control">
@@ -76,7 +76,7 @@ export default function RoutineTrend({type,records,categories,goals,date,setting
        <button type="submit" className="icon-btn" aria-label="保存目标睡眠时长"><Check size={16}/></button>
        <button type="button" className="icon-btn" aria-label="取消编辑目标睡眠时长" onClick={cancelTargetEdit}><X size={15}/></button>
       </form>)}
-   {!sleep&&<details className="trend-category-picker"><summary>显示分类（{selected.length}）<ChevronDown size={14}/></summary><div className="trend-category-menu">{options.map(c=><label key={c.id}><input type="checkbox" aria-label={`启动分类：${c.name}`} checked={ids.includes(c.id)} onChange={e=>change({[field]:e.target.checked?[...ids,c.id]:ids.filter(id=>id!==c.id)})}/><span className="dot" style={{background:c.color}}/>{c.name}</label>)}</div></details>}
+   {!sleep&&<details className="trend-category-picker"><summary>启动分类（{selected.length}）<ChevronDown size={14}/></summary><div className="trend-category-menu">{options.map(c=><label key={c.id}><input type="checkbox" aria-label={`启动分类：${c.name}`} checked={ids.includes(c.id)} onChange={e=>change({[field]:e.target.checked?[...ids,c.id]:ids.filter(id=>id!==c.id)})}/><span className="dot" style={{background:c.color}}/>{c.name}</label>)}</div></details>}
   </div>
   <p className="trend-range">{days[0]} 至 {days.at(-1)}</p>
 
@@ -109,7 +109,18 @@ export default function RoutineTrend({type,records,categories,goals,date,setting
        }
        return sleep?`${Number(value)<0?'前一晚 ':''}${sleepTimeLabel(value)}`:routineTimeLabel(value)
       }}/>
-     <Legend wrapperStyle={{fontSize:12,paddingTop:12}}/>
+     <Legend wrapperStyle={{fontSize:12,paddingTop:12}} content={sleep?undefined:()=>(
+      <div className="work-chart-legend">
+       {series.length>0&&<ul aria-label="启动时刻">
+        {series.map(({key,name,color})=><li key={key} style={{color}}><i className="work-line-key" aria-hidden="true"/>{name}</li>)}
+       </ul>}
+       <div className="work-duration-key">
+        <span>工作时长</span>
+        <span><i className="work-bar-key is-met" aria-hidden="true"/>达标</span>
+        <span><i className="work-bar-key is-unmet" aria-hidden="true"/>未达标</span>
+       </div>
+      </div>
+     )}/>
      <Bar yAxisId="duration" dataKey={durationHours} name={durationName} fill={durationColor} maxBarSize={30}
       radius={[4,4,0,0]} isAnimationActive={false}>
       {chartData.map(({date,duration})=>{
