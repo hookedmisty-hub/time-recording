@@ -1,11 +1,14 @@
+import PlanImport from './PlanImport.jsx'
 import LogTasks from './LogTasks.jsx'
 import {useEffect,useLayoutEffect,useRef,useState} from 'react'
-import {Plus,Trash2,X,Pencil} from 'lucide-react'
+import {Plus,Trash2,X,Pencil,Upload} from 'lucide-react'
 import TemporalInput, {withStartTime} from './TemporalInput.jsx'
 import {planMinutes,savePlan,planLanes,planLogAction,planOverlapsRecord,tasksForLog,assignPlanTask} from './plans.js'
 const clock=m=>`${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`
 export default function PlanLog({date,today,plans=[],records,daily,categories,projects,deliverables,onChange,onLog,onEditLog,onLogTasks,recordEditor=null,recordAnchor=null,onDismissRecord,openRequest=null,onRequestHandled}){
  const [draft,setDraft]=useState(null),[text,setText]=useState(''),[error,setError]=useState(''),[now,setNow]=useState(()=>new Date())
+ const [showPlanImport,setShowPlanImport]=useState(false)
+ const [importResult,setImportResult]=useState(null)
  const [taskEdit,setTaskEdit]=useState(null)
  const [logChoices,setLogChoices]=useState(null)
  const [selected,setSelected]=useState(null),[zoom,setZoom]=useState(3.6)
@@ -63,6 +66,13 @@ export default function PlanLog({date,today,plans=[],records,daily,categories,pr
  const toggleZoom=()=>{if(scroller.current)zoomPosition.current=(scroller.current.scrollTop-(anchorPlan?panelSpace:0))/zoom;setZoom(z=>z===1.8?3.6:1.8)}
  const persist=next=>{try{onChange(next);setError('');return true}catch(e){setError(e.message);return false}}
  const open=p=>{setLogChoices(null);setTaskEdit(null);setDraft(structuredClone(p));setText('');setError('')}
+ const importPlans=additions=>{
+  onChange([...plans,...additions])
+  setShowPlanImport(false)
+  setImportResult({date,count:additions.length})
+  const firstVisible=additions.find(plan=>plan.date===date)
+  if(firstVisible&&scroller.current&&!anchorPlan)scroller.current.scrollTop=Math.max(0,planMinutes(firstVisible.start)*zoom-80)
+ }
  const create=(start='09:00')=>open({id:crypto.randomUUID(),date,title:'',start,end:clock(Math.min(1440,planMinutes(start)+60)),categoryId:'',projectId:'',deliverableId:'',tasks:[],createdAt:new Date().toISOString()})
  const submit=e=>{e.preventDefault();try{if(persist(savePlan(plans,{...draft,title:draft.title.trim()})))setDraft(null)}catch(e){setError(e.message)}}
  const changeTask=(p,taskId,patch,remove=false)=>{const next={...p,tasks:remove?p.tasks.filter(t=>t.id!==taskId):p.tasks.map(t=>t.id===taskId?{...t,...patch}:t)};setDraft(next);if(plans.some(x=>x.id===p.id)){try{if(!persist(savePlan(plans,next)))return false}catch(e){setError(e.message);return false}}return true}
@@ -72,8 +82,10 @@ export default function PlanLog({date,today,plans=[],records,daily,categories,pr
  const blocks=planLanes(plans.filter(p=>p.date===date).map(p=>({id:p.id,a:planMinutes(p.start),b:planMinutes(p.end),p})))
  const logs=planLanes(daily.map(r=>({id:r.id,a:r.segmentStart,b:r.segmentEnd,r})))
  const log=p=>{const action=planLogAction(p,records);if(action.type==='edit'){onEditLog(action.records[0]);setDraft(null);setLogChoices(null);return}if(action.type==='choose'){setLogChoices({planId:p.id,records:action.records});return}const c=category(p),project=projects.find(x=>x.id===p.projectId),d=deliverables.find(x=>x.id===p.deliverableId);onLog({title:p.title,date:p.date,start:p.start,end:p.end,planId:p.id,...(c?{category:c.name}:{}),...(project?{project:project.name}:{}),...(d?{deliverableId:d.id}:{})});setDraft(null)}
- return <section className={`card planlog${zoom===1.8?" planlog-standard":""}`}><div className="planlog-toolbar"><div><h2>PLAN &amp; LOG</h2><p>点击计划块直接查看与编辑；待办方框可快速标记完成或不做了。</p></div><div className="backup-actions"><button className="secondary" onClick={toggleZoom}>{zoom===1.8?'放大时间轴':'标准时间轴'}</button><button className="secondary" onClick={scrollNow}>{date===today?'回到现在':'上午 8 点'}</button><button className="secondary" onClick={()=>create()}><Plus size={15}/>添加计划</button></div></div>
+ return <section className={`card planlog${zoom===1.8?" planlog-standard":""}`}><div className="planlog-toolbar"><div><h2>PLAN &amp; LOG</h2><p>点击计划块直接查看与编辑；待办方框可快速标记完成或不做了。</p></div><div className="backup-actions"><button className="secondary" onClick={toggleZoom}>{zoom===1.8?'放大时间轴':'标准时间轴'}</button><button className="secondary" onClick={scrollNow}>{date===today?'回到现在':'上午 8 点'}</button><button type="button" className="secondary" onClick={()=>{setImportResult(null);setShowPlanImport(true)}}><Upload size={15}/>导入计划</button><button className="secondary" onClick={()=>create()}><Plus size={15}/>添加计划</button></div></div>
 
+ {importResult?.date===date&&<p className="import-message" role="status">已导入 {importResult.count} 个计划时间块。</p>}
+ {showPlanImport&&<PlanImport key={date} date={date} plans={plans} categories={categories} projects={projects} deliverables={deliverables} onImport={importPlans} onClose={()=>setShowPlanImport(false)}/>}
  <div className="planlog-head"><strong>PLAN · 计划</strong><span>时间</span><strong>LOG · 记录</strong></div>
  <div className="planlog-scroll" ref={scroller}><div className="planlog-canvas" style={{height:1440*zoom,marginTop:anchorPlan?panelSpace:0,'--hour-height':`${60*zoom}px`}}> {draft&&!recordEditor&&<section ref={editorRef} style={{top:planMinutes(draft.start)*zoom}} className="modal fixed-action-modal planlog-inline-editor planlog-unified" role="region" aria-label="计划查看与编辑"><form onSubmit={submit}><div className="planlog-unified-heading"><input autoFocus required aria-label="计划名称" maxLength={160} placeholder="计划名称" value={draft.title} onChange={e=>setDraft({...draft,title:e.target.value})}/><button type="button" className="icon-btn" aria-label="关闭计划" onClick={()=>setDraft(null)}><X size={18}/></button></div><div className="modal-scroll-body"><details className="planlog-meta-disclosure"><summary aria-label="展开时间与关联设置"><span>{Number(draft.date.slice(5,7))}月{Number(draft.date.slice(8))}日 · {draft.start}–{draft.end}</span>{draft.categoryId&&<span className="planlog-meta-tag">{categories.find(c=>c.id===draft.categoryId)?.name||'分类已移除'}</span>}{draft.projectId&&<span className="planlog-meta-tag">{projects.find(p=>p.id===draft.projectId)?.name||'项目已移除'}</span>}{draft.deliverableId&&<span className="planlog-meta-tag">{deliverables.find(d=>d.id===draft.deliverableId)?.name||'交付任务已移除'}</span>}<Pencil size={13}/></summary><div className="planlog-meta-expanded"><div className="planlog-meta-fields"><label>日期<TemporalInput required type="date" value={draft.date} onChange={e=>setDraft({...draft,date:e.target.value})}/></label><label>开始时间<TemporalInput required type="time" value={draft.start} onChange={e=>{
   const start=e.target.value
