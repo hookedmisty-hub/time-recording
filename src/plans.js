@@ -14,6 +14,67 @@ export function validatePlans(value){
  return structuredClone(value)
 }
 export function savePlan(plans,plan){return validatePlans(plans.some(p=>p.id===plan.id)?plans.map(p=>p.id===plan.id?plan:p):[...plans,plan])}
+export function parsePlanImport(text, selectedDate, {categories=[],projects=[],deliverables=[]}={}){
+ const categoryIds=new Map(categories.map(category=>[category.name,category.id]))
+ const projectsByName=new Map(projects.map(project=>[project.name,project.id]))
+ const projectIds=new Set(projectsByName.values())
+ const input=text.trim()
+ const fencedJson=input.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/i)
+ let payload
+ try{payload=JSON.parse(fencedJson?.[1]??input)}catch{
+  throw new Error('JSON 格式无效，请检查后重试。')
+ }
+ const entries=Array.isArray(payload)?payload:payload?.plans
+ if(!Array.isArray(entries)||!entries.length)throw new Error('请提供至少一个计划时间块。')
+ const defaultDate=payload.date===undefined?selectedDate:payload.date
+ if(!validDate(defaultDate))throw new Error('日期无效，请使用 YYYY-MM-DD 格式。')
+ const createdAt=new Date().toISOString()
+ return entries.map((entry,index)=>{
+  const prefix=`第 ${index+1} 个时间块`
+  if(!entry||typeof entry!=='object'||Array.isArray(entry))throw new Error(`${prefix}应包含名称、开始时间和结束时间。`)
+  const date=entry.date===undefined?defaultDate:entry.date
+  if(!validDate(date))throw new Error(`${prefix}的日期无效，请使用 YYYY-MM-DD 格式。`)
+  if(typeof entry.start!=='string'||typeof entry.end!=='string')throw new Error(`${prefix}的开始和结束时间应使用 HH:MM 格式。`)
+  const tasks=entry.tasks===undefined?[]:entry.tasks
+  if(!Array.isArray(tasks))throw new Error(`${prefix}的待办应是文字数组。`)
+  const categoryName=typeof entry.category==='string'?entry.category.trim():''
+  const projectName=typeof entry.project==='string'?entry.project.trim():''
+  const deliverableName=typeof entry.deliverable==='string'?entry.deliverable.trim():''
+  const projectId=projectsByName.get(projectName)
+  const matches=deliverableName?deliverables.filter(item=>
+   item.name===deliverableName&&projectIds.has(item.projectId)&&(!projectName||item.projectId===projectId)
+  ):[]
+  const deliverable=matches.length===1?matches[0]:null
+  const plan={
+   id:crypto.randomUUID(),
+   date,
+   title:typeof entry.title==='string'?entry.title.trim():entry.title,
+   start:entry.start,
+   end:entry.end,
+   notes:entry.notes,
+   categoryId:categoryIds.get(categoryName)??'',
+   projectId:projectId??deliverable?.projectId??'',
+   deliverableId:deliverable?.id??'',
+   tasks:tasks.map(text=>({id:crypto.randomUUID(),text:typeof text==='string'?text.trim():text,status:'pending'})),
+   createdAt,
+  }
+  try{return validatePlans([plan])[0]}catch(error){throw new Error(`${prefix}：${error.message}`)}
+ })
+}
+export function previewPlanImport(existing, imported){
+ const key=plan=>JSON.stringify([plan.date,plan.start,plan.end,plan.title.trim()])
+ const keys=new Set(existing.map(key))
+ const additions=[]
+ for(const plan of imported){
+  const identity=key(plan)
+  if(keys.has(identity))continue
+  keys.add(identity)
+  additions.push(plan)
+ }
+ additions.sort((a,b)=>a.date.localeCompare(b.date)||planMinutes(a.start)-planMinutes(b.start)||planMinutes(a.end)-planMinutes(b.end))
+ return {additions,skipped:imported.length-additions.length}
+}
+
 export function deferPlanTask(plans,plan,taskId,date){
  if(!validDate(date)||date<=plan.date)throw new Error('请选择晚于原计划的日期。')
  const task=plan.tasks.find(t=>t.id===taskId);if(!task||task.status==='deferred')throw new Error('该待办无法再次延期。')

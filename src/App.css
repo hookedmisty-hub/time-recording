@@ -638,3 +638,29 @@ form label.midnight-option{display:flex;align-items:center;gap:8px}form .midnigh
 .work-bar-key{display:inline-block;width:11px;height:9px;border:1px solid #a78bfa99;border-radius:2px}
 .work-bar-key.is-met{background:#a78bfa40}
 .work-bar-key.is-unmet{background:repeating-linear-gradient(-45deg,#a78bfa99 0 1px,#a78bfa14 1px 4px)}
+
+.plan-import{width:min(600px,100%);max-width:600px}
+.plan-import .modal-scroll-body{scrollbar-color:#49576e transparent}
+.plan-import .import-help{margin:0}
+.plan-import textarea,.plan-import pre{font-family:ui-monospace,monospace}
+.plan-import-file{justify-self:start}
+.plan-import-format{font-size:13px;color:#a9b6cc}
+.plan-import-format summary{cursor:pointer;color:#c4b5fd}
+.plan-import-format[open] summary{margin-bottom:8px}
+.plan-import-format>span{margin-left:8px}
+.plan-import-examples{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:12px}
+.plan-import-examples h3,.plan-import-day h3{margin:0 0 6px;font-size:12px;font-weight:600}
+.plan-import-date-help{margin:8px 0 0;font-size:12px;line-height:1.5;color:#a9b6cc}
+.plan-import-format pre{margin:0;padding:10px;border-radius:8px;background:#111a29;font-size:12px;line-height:1.45;white-space:pre-wrap;overflow-wrap:anywhere}
+.plan-import-example-block{--block-color:#a78bfa;position:static;padding:10px;cursor:default}
+.plan-import-example-block ul{list-style:none;margin:0;padding:0}
+.plan-import-example-note{margin-top:8px;padding:8px 10px;border:1px solid #34435d;border-radius:7px;font-size:12px}
+.plan-import-example-note p{margin:3px 0 0;color:#e7ecf6}
+@media(max-width:560px){.plan-import-examples{grid-template-columns:minmax(0,1fr)}}
+.plan-import-preview{list-style:none;display:grid;gap:8px;margin:0;padding:0;font-size:13px}
+.plan-import-preview>li{border:1px solid #34435d;border-radius:8px;padding:10px;overflow-wrap:anywhere}
+.plan-import-preview>li>div{display:flex;align-items:baseline;gap:4px 10px;flex-wrap:wrap}
+.plan-import-preview .planlog-block-tags{margin-top:6px}
+.plan-import-preview time{color:#c4b5fd}
+.plan-import-preview ul{margin:6px 0 0;padding-left:20px;color:#c0cadb}
+.plan-import-preview p{margin:6px 0 0;color:#a9b6cc;white-space:pre-wrap}
