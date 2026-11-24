@@ -80,3 +80,74 @@ test('independent LOG tasks and plan execution ownership survive backup and clou
  assert.equal(merged.records[0].logTasks[0].status,'done');assert.equal(merged.preferences.plans[0].tasks.length,1)
  assert.throws(()=>parseBundle(JSON.stringify({...journal,version:'1.4',records:[{...r,logTasks:[{id:'x',text:'',status:'done'}]}]})))
 })
+
+test('plan import reads fenced JSON, creates pending tasks and previews only new intervals',async()=>{
+ const {parsePlanImport,previewPlanImport}=await import('../src/plans.js')
+ const date='2026-11-24'
+ const first={title:'整理资料',start:'09:00',end:'10:00',tasks:['读材料'],notes:'查看旧笔记'}
+ const late={title:'晚间回顾',start:'23:30',end:'24:00'}
+ const payload={date,plans:[late,first,first]}
+ const incoming=parsePlanImport('```json\n'+JSON.stringify(payload)+'\n```',date)
+ const preview=previewPlanImport([],incoming)
+ assert.equal(preview.skipped,1)
+ assert.deepEqual(preview.additions.map(plan=>plan.title),[first.title,late.title])
+ const [plan]=preview.additions
+ assert.equal(plan.date,date)
+ assert.equal(plan.notes,first.notes)
+ assert.deepEqual(plan.tasks.map(task=>[task.text,task.status]),[['读材料','pending']])
+ assert.ok(plan.id)
+ const repeated=previewPlanImport(preview.additions,parsePlanImport(JSON.stringify(payload),date))
+ assert.deepEqual(repeated,{additions:[],skipped:3})
+ assert.equal(previewPlanImport([{...plan,date:'2026-11-23'}],[plan]).additions.length,1)
+})
+
+test('plan import rejects malformed JSON, invalid dates and invalid time blocks',async()=>{
+ const {parsePlanImport}=await import('../src/plans.js')
+ const date='2026-11-24'
+ const block={title:'整理资料',start:'09:00',end:'10:00'}
+ assert.throws(()=>parsePlanImport('任意文字',date),/JSON 格式无效/)
+ assert.throws(()=>parsePlanImport(JSON.stringify({date:'2026-11-31',plans:[block]}),date),/日期无效/)
+ assert.throws(()=>parsePlanImport(JSON.stringify([{...block,date:'2026-02-30'}]),date),/第 1 个时间块的日期无效/)
+ assert.throws(()=>parsePlanImport(JSON.stringify([block,{...block,end:'08:00'}]),date),/第 2 个时间块/)
+ assert.throws(()=>parsePlanImport(JSON.stringify([{...block,tasks:[42]}]),date),/待办/)
+})
+
+test('plan import sorts multiple dates and keeps identical blocks on different days',async()=>{
+ const {parsePlanImport,previewPlanImport}=await import('../src/plans.js')
+ const selected='2026-11-24'
+ const shared='2026-11-25'
+ const explicit='2026-11-26'
+ const block={title:'复盘',start:'09:00',end:'10:00'}
+ const incoming=parsePlanImport(JSON.stringify({date:shared,plans:[{...block,date:explicit},block]}),selected)
+ const result=previewPlanImport([],incoming)
+ assert.deepEqual(result.additions.map(plan=>plan.date),[shared,explicit])
+ assert.equal(result.skipped,0)
+ assert.equal(parsePlanImport(JSON.stringify([block]),selected)[0].date,selected)
+})
+
+test('plan import matches catalog names and skips missing or ambiguous links',async()=>{
+ const {parsePlanImport}=await import('../src/plans.js')
+ const date='2026-11-24'
+ const block={title:'写报告',start:'09:00',end:'10:00'}
+ const catalog={
+  categories:[{id:'core',name:'核心工作'}],
+  projects:[{id:'p1',name:'项目1'},{id:'p2',name:'项目2'}],
+  deliverables:[
+   {id:'d1',projectId:'p1',name:'报告'},
+   {id:'d2',projectId:'p2',name:'报告'},
+   {id:'d3',projectId:'p2',name:'附录'},
+  ],
+ }
+ const values=[
+  {category:' 核心工作 ',project:'项目2',deliverable:'报告'},
+  {category:'未知分类',project:'未知项目',deliverable:'附录'},
+  {project:'项目1',deliverable:'附录'},
+  {deliverable:'附录'},
+  {deliverable:'报告'},
+  {project:'项目2',deliverable:'未知任务'},
+ ]
+ const imported=parsePlanImport(JSON.stringify(values.map(value=>({...block,...value}))),date,catalog)
+ assert.deepEqual(imported.map(plan=>[plan.categoryId,plan.projectId,plan.deliverableId]),[
+  ['core','p2','d2'],['','',''],['','p1',''],['','p2','d3'],['','',''],['','p2',''],
+ ])
+})
