@@ -25,7 +25,7 @@ import {TODO_KEY,loadTodos} from './todos.js'
 import Rewards, {RewardRules} from './Rewards.jsx'
 import {GOAL_KEY,REWARD_KEY,defaultRewards,loadJSON,calculateRewards,settlePending} from './rewards.js'
 import {parseBundle} from './backupBundle.js'
-import {DELIVERABLE_KEY,loadDeliverables,mergeDeliverables} from './deliverables.js'
+import {DELIVERABLE_KEY,loadDeliverables,mergeDeliverables,clearDeliverableLinks} from './deliverables.js'
 import {researchAllocation} from './research.js'
 import {PROJECT_KEY,loadProjects,includeProjects,normalizeProjectRecords,UNASSIGNED_PROJECT} from './projects.js'
 import {CATEGORY_KEY,loadCategories,includeCategories,splitHourly,workCategory} from './categories.js'
@@ -136,6 +136,21 @@ function App(){
     const next=deliverableById.has(item.id)?deliverables.map(old=>old.id===item.id?item:old):[...deliverables,item]
     localStorage.setItem(DELIVERABLE_KEY,JSON.stringify(next))
     setDeliverables(next)
+  }
+  const removeDeliverable=id=>{
+    if(!deliverableById.has(id))return
+    const removedIds=new Set([id])
+    const nextDeliverables=deliverables.filter(item=>item.id!==id)
+    const nextRecords=clearDeliverableLinks(records,removedIds)
+    const nextPlans=preferences.plans&&clearDeliverableLinks(preferences.plans,removedIds,'')
+    const entries=[[DELIVERABLE_KEY,nextDeliverables]]
+    if(nextRecords!==records)entries.push([KEY,nextRecords])
+    const nextPreferences=nextPlans===preferences.plans?preferences:{...preferences,plans:nextPlans}
+    if(nextPreferences!==preferences)entries.push([PREFERENCES_KEY,nextPreferences])
+    writeStorage(entries)
+    setDeliverables(nextDeliverables)
+    setRecords(nextRecords)
+    setPreferences(nextPreferences)
   }
   const deliveryProjects=projects.filter(p=>p.id!==UNASSIGNED_PROJECT&&(!deliveryProjectId||p.id===deliveryProjectId)&&
     (!p.archived||p.id===deliveryProjectId||deliverables.some(item=>item.projectId===p.id)))
@@ -429,7 +444,7 @@ function App(){
     <p className="import-help">按项目管理交付项。截止时间、阶段成果和完成时间按本机时区显示。</p>
     <div className="category-list">
       {deliveryProjects.map(project=><DeliverableEditor key={project.id} project={project}
-        items={deliverables.filter(item=>item.projectId===project.id)} records={records} onChange={saveDeliverable}/>)}
+        items={deliverables.filter(item=>item.projectId===project.id)} records={records} onChange={saveDeliverable} onRemove={removeDeliverable}/>)}
       {!deliveryProjects.length&&<section className="card"><p>先创建一个项目，再添加交付项。</p><button className="secondary" onClick={()=>setShowProjects(true)}>打开项目管理</button></section>}
     </div>
   </>}

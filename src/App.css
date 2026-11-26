@@ -154,6 +154,11 @@ form label.midnight-option{display:flex;align-items:center;gap:8px}form .midnigh
 .deliverable-fields>.deliverable-time-field{flex:0 1 15rem}
 .deliverable-time-controls{display:flex;align-items:center;gap:5px;min-width:0;width:100%}
 .deliverable-form input{height:36px}
+.deliverable-form .actions{flex-wrap:wrap}
+.deliverable-delete-prompt{grid-column:1/-1;min-width:0;padding-top:10px;border-top:1px solid #34435d}
+.deliverable-delete-prompt .actions{flex-wrap:wrap}
+.deliverable-delete-prompt .deliverable-delete-confirm{color:#fecdd3;border-color:#9f5162;background:#511f31}
+.deliverable-delete-message{margin:0;overflow-wrap:anywhere}
 .deliverable-time-controls input{flex:1 1 0;width:0;min-width:0;font-size:13px;color-scheme:dark}
 .deliverable-time-action{display:grid;place-items:center;flex:0 0 28px;height:28px;padding:0;border:1px solid #34435d;border-radius:6px;background:transparent;color:#aab8cf}
 .deliverable-time-action.mark{color:#c4b5fd}
@@ -166,13 +171,15 @@ form label.midnight-option{display:flex;align-items:center;gap:8px}form .midnigh
 }
 
 .deliverable-list{gap:8px;margin-bottom:0}
-.deliverable-item{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 12px}
+.deliverable-item{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;padding:9px 12px}
 .deliverable-item-copy{display:grid;min-width:0;gap:3px;overflow-wrap:anywhere}
 .deliverable-item-copy strong{line-height:1.3}
 .deliverable-item-meta{margin:0;color:#b8c3d5;font-size:12px;line-height:1.4}
-.deliverable-edit{display:grid;place-items:center;flex:0 0 28px;height:28px;border-radius:6px;color:#aab8cf}
-.deliverable-edit:hover:not(:disabled){background:#25334b}
-.deliverable-edit:disabled{opacity:.45;cursor:default}
+.deliverable-item-actions{display:flex;align-items:center;gap:4px}
+.deliverable-item-actions .icon-btn{display:grid;place-items:center;width:28px;height:28px;border-radius:6px;color:#aab8cf}
+.deliverable-item-actions .icon-btn:is(:hover,:focus-visible):not(:disabled){background:#25334b}
+.deliverable-item-actions .deliverable-delete:is(:hover,:focus-visible,[aria-expanded="true"]):not(:disabled){color:#fda4af}
+.deliverable-item-actions .icon-btn:disabled{opacity:.45;cursor:default}
 
 .calendar-days>button{position:relative}
 .calendar-days>button:hover,.calendar-days>button:focus-visible{z-index:2}
@@ -296,7 +303,7 @@ form label.midnight-option{display:flex;align-items:center;gap:8px}form .midnigh
 
 /* Shared typography for text actions; icon-only and navigation controls keep their own sizing. */
 :root{--action-button-font-size:13px;--action-button-font-weight:600;--action-button-line-height:1.4}
-.app button:not(.close):not(.icon-btn):not(.nav-btn):not(.encryption-help-toggle):not(.deliverable-edit):not(.deliverable-time-action):not(.calendar-heading>button){font-size:var(--action-button-font-size);font-weight:var(--action-button-font-weight);line-height:var(--action-button-line-height)}
+.app button:not(.close):not(.icon-btn):not(.nav-btn):not(.encryption-help-toggle):not(.deliverable-time-action):not(.calendar-heading>button){font-size:var(--action-button-font-size);font-weight:var(--action-button-font-weight);line-height:var(--action-button-line-height)}
 :root{--action-button-height:40px;--action-button-padding-x:14px}
 .app :is(.primary,.secondary){min-height:var(--action-button-height);padding:9px var(--action-button-padding-x);justify-content:center}
 .app .account-actions>.secondary{padding-inline:8px;min-width:0}

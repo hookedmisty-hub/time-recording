@@ -1,5 +1,6 @@
 import {canonical} from './cloudMigration.js'
 import {parseBundle} from './backupBundle.js'
+import {clearDeliverableLinks} from './deliverables.js'
 
 export const same = (a,b) => canonical(a) === canonical(b)
 export const clone = value => structuredClone(value)
@@ -60,6 +61,14 @@ export function mergeJournal(base,local,remote,choices={}) {
   // Record ordering carries no meaning. This also keeps clients stable after merging.
   journal.records.sort((a,b)=>a.id.localeCompare(b.id))
   journal.deliverables.sort((a,b)=>a.id.localeCompare(b.id))
+  if(base){
+    const activeIds=new Set(journal.deliverables.map(item=>item.id))
+    const removedIds=new Set(base.deliverables.map(item=>item.id).filter(id=>!activeIds.has(id)))
+    if(removedIds.size){
+      journal.records=clearDeliverableLinks(journal.records,removedIds)
+      if(journal.preferences?.plans)journal.preferences.plans=clearDeliverableLinks(journal.preferences.plans,removedIds,'')
+    }
+  }
   try{return {conflicts:[],journal:validateJournal(journal),error:null}}
   catch(error){return {conflicts:[],journal:null,error:error.message}}
 }

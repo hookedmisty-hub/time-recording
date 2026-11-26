@@ -1,5 +1,5 @@
 import TemporalInput from './TemporalInput.jsx'
-import {Check,Pencil,X} from 'lucide-react'
+import {Check,Pencil,Trash2,X} from 'lucide-react'
 import {useEffect,useState} from 'react'
 
 function localInput(value){
@@ -18,16 +18,19 @@ function fromLocal(value){
  return date.toISOString()
 }
 
-export default function DeliverableEditor({project,items,records,onChange}){
+export default function DeliverableEditor({project,items,records,onChange,onRemove}){
  const [now,setNow]=useState(()=>Date.now())
  useEffect(()=>{const timer=setInterval(()=>setNow(Date.now()),1000);return ()=>clearInterval(timer)},[])
  const [draft,setDraft]=useState(null)
  const [error,setError]=useState('')
+ const [deleteItemId,setDeleteItemId]=useState(null)
+ const busy=Boolean(draft)||items.some(item=>item.id===deleteItemId)
  const pending=items.filter(item=>!item.completedAt)
  const completed=items.filter(item=>item.completedAt)
  const savedItem=items.find(item=>item.id===draft?.id)
  const update=patch=>{setDraft(old=>({...old,...patch}));setError('')}
  const open=item=>{setDraft(item);setError('')}
+ const requestDelete=id=>{setDeleteItemId(id);setError('')}
  const save=e=>{
   e.preventDefault()
   const name=draft.name.trim(),milestoneName=draft.milestoneName.trim()
@@ -43,6 +46,10 @@ export default function DeliverableEditor({project,items,records,onChange}){
   if(item.milestoneAt&&!milestoneName)return setError('请填写阶段成果名称，或清除达成时间。')
   try{onChange(item)}catch{return setError('保存失败，请检查浏览器存储后重试。')}
   open(null)
+ }
+ const remove=id=>{
+  try{onRemove(id)}catch{return setError('删除失败，请检查浏览器存储后重试。')}
+  requestDelete(null)
  }
  const setTime=(event,key,value)=>{
   event.currentTarget.form.elements.namedItem(key).value=localInput(value)
@@ -65,14 +72,34 @@ export default function DeliverableEditor({project,items,records,onChange}){
    <strong>{item.name}</strong>
    <p className="deliverable-item-meta">{item.dueAt&&<><span className={!item.completedAt&&Date.parse(item.dueAt)<now?'deliverable-overdue':undefined}>截止 {localInput(item.dueAt).replace('T',' ')}</span> · </>}{item.milestoneAt?`${item.milestoneName} ${localInput(item.milestoneAt).replace('T',' ')} · `:''}{item.completedAt?`完成 ${localInput(item.completedAt).replace('T',' ')}`:'进行中'} · {records.filter(r=>r.deliverableId===item.id).length} 条记录</p>
   </div>
-  <button type="button" className="icon-btn deliverable-edit" aria-label={`编辑 ${item.name}`} title="编辑交付项" disabled={Boolean(draft)} onClick={()=>open(item)}>
-   <Pencil size={16} aria-hidden="true"/>
-  </button>
+  <div className="deliverable-item-actions">
+   <button type="button" className="icon-btn" aria-label={`编辑 ${item.name}`} title="编辑交付项" disabled={busy} onClick={()=>open(item)}>
+    <Pencil size={16} aria-hidden="true"/>
+   </button>
+   <button type="button" className="icon-btn deliverable-delete" aria-label={`删除交付项 ${item.name}`}
+    aria-expanded={deleteItemId===item.id} disabled={busy&&deleteItemId!==item.id}
+    onClick={()=>requestDelete(deleteItemId===item.id?null:item.id)}>
+    <Trash2 size={16} aria-hidden="true"/>
+   </button>
+  </div>
+  {deleteItemId===item.id&&<div className="deliverable-delete-prompt">
+   <p className="import-help deliverable-delete-message" role="status">
+    确定删除「{item.name}」？关联的时间记录和计划会保留，并解除关联。
+   </p>
+   {error&&<p className="form-error" role="alert">{error}</p>}
+   <div className="actions">
+    <button type="button" className="secondary" autoFocus onClick={event=>{
+     event.currentTarget.closest('.deliverable-item').querySelector('.deliverable-delete').focus()
+     requestDelete(null)
+    }}>取消删除</button>
+    <button type="button" className="secondary deliverable-delete-confirm" onClick={()=>remove(item.id)}>确认删除</button>
+   </div>
+  </div>}
  </div>
  const add=()=>open({id:crypto.randomUUID(),projectId:project.id,name:'',dueAt:null,milestoneName:'',milestoneAt:null,completedAt:null})
  return <section className="card">
   <div className="card-title"><h2>{project.name}{project.archived?'（已归档）':''}</h2>
-   <button className="secondary" disabled={Boolean(draft)} onClick={add}>＋ 新增交付项</button>
+   <button className="secondary" disabled={busy} onClick={add}>＋ 新增交付项</button>
   </div>
   {draft?<form className="category-row deliverable-form" key={draft.id} onSubmit={save}>
    <div className="deliverable-fields">
@@ -98,7 +125,10 @@ export default function DeliverableEditor({project,items,records,onChange}){
     </details>
    </div>
    {error&&<p className="form-error" role="alert">{error}</p>}
-   <div className="actions"><button type="button" className="secondary" onClick={()=>open(null)}>取消编辑</button><button className="primary">保存交付项</button></div>
+   <div className="actions">
+    <button type="button" className="secondary" onClick={()=>open(null)}>取消编辑</button>
+    <button type="submit" className="primary">保存交付项</button>
+   </div>
   </form>:null}
   {pending.length>0?<div className="category-list deliverable-list">{pending.map(itemRow)}</div>:<p className="import-help">暂无进行中的交付项。</p>}
   {completed.length>0&&<details className="archived-projects">

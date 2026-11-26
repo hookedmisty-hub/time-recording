@@ -22,6 +22,15 @@ export function validateDeliverables(items,projects){
  })
 }
 
+export function clearDeliverableLinks(entries, removedIds, emptyId){
+ if(!entries.some(entry=>removedIds.has(entry.deliverableId)))return entries
+ return entries.map(entry=>{
+  if(!removedIds.has(entry.deliverableId))return entry
+  const {deliverableId: _deliverableId,...unlinked}=entry
+  return emptyId===undefined?unlinked:{...unlinked,deliverableId:emptyId}
+ })
+}
+
 export function loadDeliverables(projects){
  try{return validateDeliverables(JSON.parse(localStorage.getItem(DELIVERABLE_KEY)||'[]'),projects)}
  catch{return []}
